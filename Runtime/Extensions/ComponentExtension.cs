@@ -222,7 +222,7 @@ namespace Devloader.Extensions
         }
 
         /// <summary>
-        /// Try to find a component in the children. Return the first component found.
+        /// Try to find a component in the children. Return true if a component is found and set the value in the out parameter, otherwise return false and set the out parameter to null.
         /// </summary>
         /// <param name="component"></param>
         /// <param name="foundComponent">The component found. If several components exists, the first one will be returned.</param>
@@ -234,7 +234,7 @@ namespace Devloader.Extensions
         }
 
         /// <summary>
-        /// Try to find components in the children.
+        /// Try to find components in the children. Return true if at least one component is found and set all the components in the out parameter, otherwise return false and set the out parameter to null.
         /// </summary>
         /// <param name="component"></param>
         /// <param name="foundComponents">The components found.</param>
