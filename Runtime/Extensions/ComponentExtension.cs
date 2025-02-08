@@ -162,6 +162,17 @@ namespace Devloader.Extensions
         }
 
         /// <summary>
+        /// Search all the occurence of the specified Component in the Current Component GameObject and its parents
+        /// </summary>
+        public static T[] FindComponentsInParent<T>(this Component current, bool includeInactive = true) where T : Component
+        {
+            List<T> components = new List<T>(current.GetComponents<T>());
+            components.AddRange(current.GetComponentsInParent<T>(includeInactive));
+
+            return components.ToArray();
+        }
+
+        /// <summary>
         /// Create a new GameObject or Instantiate a prefab and attach a component of type T
         /// 
         /// You can modify gameObject parameters (like name or SetActive(bool)) using the returned component.gameObject
@@ -242,6 +253,30 @@ namespace Devloader.Extensions
         public static bool TryFindComponents<T>(this Component component, out T[] foundComponents, bool includeInactive = true, uint componentToCreate = 0) where T : Component
         {
             foundComponents = component.FindComponents<T>(includeInactive, componentToCreate);
+            return foundComponents.Length > 0;
+        }
+
+        /// <summary>
+        /// Try to find a component in the children. Return true if a component is found and set the value in the out parameter, otherwise return false and set the out parameter to null.
+        /// </summary>
+        /// <param name="component"></param>
+        /// <param name="foundComponent">The component found. If several components exists, the first one will be returned.</param>
+        /// <returns>Return true if a component was found.</returns>
+        public static bool TryFindComponentInParent<T>(this Component component, out T foundComponent, bool includeInactive = true, bool createIfNotExists = false) where T : Component
+        {
+            foundComponent = component.FindComponentInParent<T>(includeInactive);
+            return foundComponent is not null;
+        }
+
+        /// <summary>
+        /// Try to find components in the children. Return true if at least one component is found and set all the components in the out parameter, otherwise return false and set the out parameter to null.
+        /// </summary>
+        /// <param name="component"></param>
+        /// <param name="foundComponents">The components found.</param>
+        /// <returns>Return true if atleast one component was found.</returns>
+        public static bool TryFindComponentsInParent<T>(this Component component, out T[] foundComponents, bool includeInactive = true, uint componentToCreate = 0) where T : Component
+        {
+            foundComponents = component.FindComponentsInParent<T>(includeInactive);
             return foundComponents.Length > 0;
         }
 
