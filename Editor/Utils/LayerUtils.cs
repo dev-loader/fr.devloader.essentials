@@ -1,11 +1,11 @@
 /// Copyright 2025, Antonin Boureau, All rights reserved.
-/// Version 20250207
+/// Version 20250210
 
 using UnityEditor;
 
-namespace Devloader.EditorOnly.Utils
+namespace Devloader.Utils.EditorOnly
 {
-    public class LayerUtils
+    public static class LayerUtils
     {
         static SerializedObject manager;
         static SerializedProperty prop;
