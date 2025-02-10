@@ -1,6 +1,8 @@
 /// Copyright 2025, Antonin Boureau, All rights reserved.
 /// Version 20250210
 
+using System.Collections;
+using System.Collections.Generic;
 using UnityEditor;
 
 namespace Devloader.Utils.EditorOnly
@@ -17,17 +19,17 @@ namespace Devloader.Utils.EditorOnly
         /// <summary>
         /// Create a Symbol Parser using selected build target group to select scripting defines
         /// </summary>
-        public SymbolParser() : this(PlayerSettings.GetScriptingDefineSymbolsForGroup(EditorUserBuildSettings.selectedBuildTargetGroup), EditorUserBuildSettings.selectedBuildTargetGroup) { }
+        public DefineSymbolsUtils() : this(PlayerSettings.GetScriptingDefineSymbolsForGroup(EditorUserBuildSettings.selectedBuildTargetGroup), EditorUserBuildSettings.selectedBuildTargetGroup) { }
 
         /// <summary>
         /// Create a Symbol Parser using given build target group to select scripting defines
         /// </summary>
-        public SymbolParser(BuildTargetGroup group) : this(PlayerSettings.GetScriptingDefineSymbolsForGroup(group), group) { }
+        public DefineSymbolsUtils(BuildTargetGroup group) : this(PlayerSettings.GetScriptingDefineSymbolsForGroup(group), group) { }
 
         /// <summary>
         /// Create a Symbol Parser using given symbols string
         /// </summary>
-        public SymbolParser(string symbols, BuildTargetGroup group)
+        public DefineSymbolsUtils(string symbols, BuildTargetGroup group)
         {
             _symbols = new List<string>(symbols.Split(SymbolSeparator));
             _group = group;
