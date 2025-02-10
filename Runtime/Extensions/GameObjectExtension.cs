@@ -1,5 +1,5 @@
 /// Copyright 2025, Antonin Boureau, All rights reserved.
-/// Version 20250206
+/// Version 20250210
 
 using System.Collections.Generic;
 using UnityEngine;
@@ -95,6 +95,30 @@ namespace Devloader.Extensions
 #endif
 
             return gameObject;
+        }
+
+        /// <summary>
+        /// Try to find a component in the children. Return true if a component is found and set the value in the out parameter, otherwise return false and set the out parameter to null.
+        /// </summary>
+        /// <param name="component"></param>
+        /// <param name="foundComponent">The component found. If several components exists, the first one will be returned.</param>
+        /// <returns>Return true if a component was found.</returns>
+        public static bool TryFindComponent<T>(this GameObject gameObject, out T foundComponent, bool includeInactive = true, bool createIfNotExists = false) where T : Component
+        {
+            foundComponent = gameObject.FindComponent<T>(includeInactive, createIfNotExists);
+            return foundComponent is not null;
+        }
+
+        /// <summary>
+        /// Try to find components in the children. Return true if at least one component is found and set all the components in the out parameter, otherwise return false and set the out parameter to null.
+        /// </summary>
+        /// <param name="component"></param>
+        /// <param name="foundComponents">The components found.</param>
+        /// <returns>Return true if atleast one component was found.</returns>
+        public static bool TryFindComponents<T>(this GameObject gameObject, out T[] foundComponents, bool includeInactive = true, uint componentToCreate = 0) where T : Component
+        {
+            foundComponents = gameObject.FindComponents<T>(includeInactive, componentToCreate);
+            return foundComponents.Length > 0;
         }
 
         public static T ValidateComponent<T>(this GameObject gameObject) where T : Component
