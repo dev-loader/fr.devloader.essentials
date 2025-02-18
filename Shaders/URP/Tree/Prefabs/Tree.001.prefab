@@ -217,7 +217,7 @@ PrefabInstance:
     - target: {fileID: 6492467318558918522, guid: 44ef643fd775833468918d39a776c197,
         type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6492467318558918522, guid: 44ef643fd775833468918d39a776c197,
         type: 3}
@@ -275,7 +275,7 @@ LODGroup:
     fadeTransitionWidth: 0
     renderers:
     - renderer: {fileID: 8639034738685905776}
-    - renderer: {fileID: 4488600029855780473}
+    - renderer: {fileID: 7815620400724271846}
   - screenRelativeHeight: 0.54712486
     fadeTransitionWidth: 0
     renderers:
@@ -319,6 +319,12 @@ CapsuleCollider:
 --- !u!23 &6772247950318881577 stripped
 MeshRenderer:
   m_CorrespondingSourceObject: {fileID: -459058141754309446, guid: 44ef643fd775833468918d39a776c197,
+    type: 3}
+  m_PrefabInstance: {fileID: 2619620177811345299}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &7815620400724271846 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 5200650366841220469, guid: 44ef643fd775833468918d39a776c197,
     type: 3}
   m_PrefabInstance: {fileID: 2619620177811345299}
   m_PrefabAsset: {fileID: 0}
