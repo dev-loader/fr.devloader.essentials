@@ -2,7 +2,6 @@
     "name": "Devloader.Essentials",
     "rootNamespace": "",
     "references": [
-        "GUID:7f7d1af65c2641843945d409d28f2e20",
         "GUID:75469ad4d38634e559750d17036d5f7c"
     ],
     "includePlatforms": [],
