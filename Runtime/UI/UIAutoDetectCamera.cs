@@ -1,5 +1,5 @@
 /// Copyright 2025, Antonin Boureau, All rights reserved.
-/// Version 20250206
+/// Version 202502019
 
 using Devloader.Utils;
 
@@ -19,7 +19,7 @@ namespace Devloader.UI
 
         private void Update()
         {
-            if (_canvas.renderMode != RenderMode.ScreenSpaceOverlay || _canvas.worldCamera == CameraUtils.Active)
+            if (_canvas.renderMode == RenderMode.ScreenSpaceOverlay || _canvas.worldCamera == CameraUtils.Active)
                 return;
             else
                 _canvas.worldCamera = CameraUtils.Active;
