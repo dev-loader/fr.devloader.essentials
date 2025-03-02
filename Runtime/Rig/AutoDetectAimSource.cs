@@ -1,5 +1,5 @@
 /// Copyright 2025, Antonin Boureau, All rights reserved.
-/// Version 20250207
+/// Version 20250219
 
 using Devloader.ColliderManagement;
 using Devloader.Extensions;
@@ -21,6 +21,7 @@ namespace Devloader.Rig
         [Header("Aim Settings")]
         [SerializeField] MultiAimConstraint aimConstraint;
         [SerializeField] Transform constrainedObject;
+        [SerializeField] float weightTransitionDuration = 1f;
 
         [Header("Collider settings")]
         [SerializeField] SphereCollider detectionCollider;
@@ -34,6 +35,8 @@ namespace Devloader.Rig
 
         RigBuilder rigBuilder;
 
+        bool increaseWeight;
+
         private void OnValidate()
         {
             CheckAimConstraint();
@@ -44,6 +47,14 @@ namespace Devloader.Rig
         {
             onTriggerEnter = collider => CheckColliderTrigger(collider, TriggerEventType.Enter);
             onTriggerExit = collider => CheckColliderTrigger(collider, TriggerEventType.Exit);
+        }
+
+        private void Update()
+        {
+            if (increaseWeight)
+                UpdateSourceWeight(Time.deltaTime / weightTransitionDuration);
+            else
+                UpdateSourceWeight(Time.deltaTime / - weightTransitionDuration);
         }
 
         private void OnEnable()
@@ -91,7 +102,7 @@ namespace Devloader.Rig
                     if (collider.TryFindComponent(out camera))
                     {
                         currentSourceObject.transform = camera.transform;
-                        currentSourceObject.weight = 1;
+                        increaseWeight = true;
 
                         if (aimConstraint && rigBuilder)
                         {
@@ -122,27 +133,30 @@ namespace Devloader.Rig
 
                 case TriggerEventType.Exit:
                     if (collider.TryFindComponent(out camera) && camera.transform == currentSourceObject.transform)
-                    {
-                        currentSourceObject.weight = 0;
-
-                        if(aimConstraint && rigBuilder)
-                        {
-                            WeightedTransformArray sourceObjects = aimConstraint.data.sourceObjects;
-
-                            for (int i = 0; i < sourceObjects.Count; i++)
-                                if (sourceObjects[i].transform.name == currentSourceObject.transform.name)
-                                {
-                                    sourceObjects.SetWeight(i, currentSourceObject.weight);
-
-                                    aimConstraint.data.sourceObjects = sourceObjects;
-                                    rigBuilder.Build();
-
-                                    break;
-                                }
-                        }
-                    }
+                        increaseWeight = false;
 
                     break;
+            }
+        }
+
+        void UpdateSourceWeight(float delta)
+        {
+            currentSourceObject.weight = Mathf.Clamp01(currentSourceObject.weight + delta);
+
+            if (aimConstraint && rigBuilder)
+            {
+                WeightedTransformArray sourceObjects = aimConstraint.data.sourceObjects;
+
+                for (int i = 0; i < sourceObjects.Count; i++)
+                    if (sourceObjects[i].transform.name == currentSourceObject.transform.name)
+                    {
+                        sourceObjects.SetWeight(i, currentSourceObject.weight);
+
+                        aimConstraint.data.sourceObjects = sourceObjects;
+                        rigBuilder.Build();
+
+                        break;
+                    }
             }
         }
     }
