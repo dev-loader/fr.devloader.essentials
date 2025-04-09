@@ -1,5 +1,5 @@
-﻿/// Copyright 2024, Antonin Boureau, All rights reserved.
-/// Version 20240825
+﻿/// Copyright 2025, Antonin Boureau, All rights reserved.
+/// Version 20250409
 
 using UnityEngine;
 using Devloader.Utils;
@@ -104,14 +104,16 @@ namespace Devloader.CameraManagement
         {
             base.OnEnable();
 
-            zoomAxisDelta.action.performed += ZoomAxisDeltaHandler;
+            if(zoomAxisDelta is not null && zoomAxisDelta.action is not null)
+                zoomAxisDelta.action.performed += ZoomAxisDeltaHandler;
         }
-#endif
 
-#if !ENABLE_LEGACY_INPUT_MANAGER
-        private void ZoomAxisDeltaHandler(InputAction.CallbackContext context)
+        protected override voir OnDisable()
         {
-            distanceRatio = Mathf.Clamp01(distanceRatio + context.ReadValue<float>() * Time.deltaTime * zoomAxisSensitivity);
+            base.OnDisable();
+            
+            if(zoomAxisDelta is not null && zoomAxisDelta.action is not null)
+                zoomAxisDelta.action.performed -= ZoomAxisDeltaHandler;
         }
 #endif
 
@@ -210,6 +212,13 @@ namespace Devloader.CameraManagement
 
             eyeTrackerTransform.localPosition = offset;
         }
+
+#if !ENABLE_LEGACY_INPUT_MANAGER
+        private void ZoomAxisDeltaHandler(InputAction.CallbackContext context)
+        {
+            distanceRatio = Mathf.Clamp01(distanceRatio + context.ReadValue<float>() * Time.deltaTime * zoomAxisSensitivity);
+        }
+#endif
 
         private void OnDrawGizmos()
         {
