@@ -1,5 +1,5 @@
 /// Copyright 2025, Antonin Boureau, All rights reserved.
-/// Version 20250302
+/// Version 20250409
 
 using Devloader.Extensions;
 
@@ -34,7 +34,7 @@ namespace Devloader.Shaders
             if (!outlineShader)
                 outlineShader = Shader.Find("Shader Graphs/Single Object Outline");
 
-            if (originalRenderer)
+            if (enabled && originalRenderer)
             {
                 ValidateOutlineComponents();
 
