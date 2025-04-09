@@ -1,7 +1,7 @@
 {
   "name": "fr.devloader.essentials",
   "displayName": "Dev'loader Essentials Library",
-  "version": "1.0.0-0.4.0+20250302",
+  "version": "1.0.0-0.4.2+20250409",
   "unity": "2022.3",
   "description": "Provides some resources like materials and shaders",
   "keywords": [
