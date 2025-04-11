@@ -1,5 +1,5 @@
 ﻿/// Copyright 2025, Antonin Boureau, All rights reserved.
-/// Version 20250409
+/// Version 20250411
 
 using UnityEngine;
 using Devloader.Utils;
@@ -108,7 +108,7 @@ namespace Devloader.CameraManagement
                 zoomAxisDelta.action.performed += ZoomAxisDeltaHandler;
         }
 
-        protected override voir OnDisable()
+        protected override void OnDisable()
         {
             base.OnDisable();
             
