@@ -1,11 +1,13 @@
 /// Copyright 2025, Antonin Boureau, All rights reserved.
-/// Version 20250219
+/// Version 20250413
 
 using Devloader.ColliderManagement;
 using Devloader.Extensions;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
-using UnityEngine.Events;
 
 namespace Devloader.Rig
 {
@@ -27,15 +29,9 @@ namespace Devloader.Rig
         [SerializeField] SphereCollider detectionCollider;
         [SerializeField] float detectionRadius = 0;
 
-        [Header("For debug purposes")]
-        [SerializeField] WeightedTransform currentSourceObject;
-
-        UnityAction<Collider> onTriggerEnter;
-        UnityAction<Collider> onTriggerExit;
-
         RigBuilder rigBuilder;
 
-        bool increaseWeight;
+        Dictionary<string, Coroutine> coroutines = new Dictionary<string, Coroutine>();
 
         private void OnValidate()
         {
@@ -43,25 +39,11 @@ namespace Devloader.Rig
             CheckColliderSettings();
         }
 
-        private void Awake()
-        {
-            onTriggerEnter = collider => CheckColliderTrigger(collider, TriggerEventType.Enter);
-            onTriggerExit = collider => CheckColliderTrigger(collider, TriggerEventType.Exit);
-        }
-
-        private void Update()
-        {
-            if (increaseWeight)
-                UpdateSourceWeight(Time.deltaTime / weightTransitionDuration);
-            else
-                UpdateSourceWeight(Time.deltaTime / - weightTransitionDuration);
-        }
-
         private void OnEnable()
         {
             ColliderEventHandler eventHandler = this.ValidateComponent<ColliderEventHandler>();
-            eventHandler.triggerEnterEvent.AddListener(onTriggerEnter);
-            eventHandler.triggerExitEvent.AddListener(onTriggerExit);
+            eventHandler.triggerEnterEvent.AddListener(ColliderTriggerEnterHandler);
+            eventHandler.triggerExitEvent.AddListener(ColliderTriggerExitHandler);
 
             if (aimConstraint)
                 rigBuilder = aimConstraint.FindComponentInParent<RigBuilder>();
@@ -70,8 +52,8 @@ namespace Devloader.Rig
         private void OnDisable()
         {
             ColliderEventHandler eventHandler = this.ValidateComponent<ColliderEventHandler>();
-            eventHandler.triggerEnterEvent.RemoveListener(onTriggerEnter);
-            eventHandler.triggerExitEvent.RemoveListener(onTriggerExit);
+            eventHandler.triggerEnterEvent.RemoveListener(ColliderTriggerEnterHandler);
+            eventHandler.triggerExitEvent.RemoveListener(ColliderTriggerExitHandler);
         }
 
         void CheckAimConstraint()
@@ -93,70 +75,102 @@ namespace Devloader.Rig
             }
         }
 
-        void CheckColliderTrigger(Collider collider, TriggerEventType eventType)
+        void ColliderTriggerEnterHandler(Collider collider)
         {
-            Camera camera;
-            switch (eventType)
+            if (collider.GetComponent<CharacterController>() && collider.TryFindComponent(out Camera camera))
             {
-                case TriggerEventType.Enter:
-                    if (collider.TryFindComponent(out camera))
+                if (aimConstraint && rigBuilder)
+                {
+                    int i = FindTransformIndex(camera.name);
+
+                    if (i < 0)
                     {
-                        currentSourceObject.transform = camera.transform;
-                        increaseWeight = true;
+                        WeightedTransformArray transforms = aimConstraint.data.sourceObjects;
+                        transforms.Add(new WeightedTransform(camera.transform, 0));
 
-                        if (aimConstraint && rigBuilder)
-                        {
-                            WeightedTransformArray sourceObjects = aimConstraint.data.sourceObjects;
-
-                            bool found = false;
-
-                            for (int i = 0; i < sourceObjects.Count && !found; i++)
-                                if (sourceObjects[i].transform.name == currentSourceObject.transform.name)
-                                {
-                                    sourceObjects.SetWeight(i, currentSourceObject.weight);
-                                    aimConstraint.data.sourceObjects = sourceObjects;
-
-                                    found = true;
-                                }
-
-                            if(!found)
-                            {
-                                sourceObjects.Add(currentSourceObject);
-                                aimConstraint.data.sourceObjects = sourceObjects;
-                            }
-
-                            rigBuilder.Build();
-                        }
+                        aimConstraint.data.sourceObjects = transforms;
+                        rigBuilder.Build();
                     }
 
-                    break;
-
-                case TriggerEventType.Exit:
-                    if (collider.TryFindComponent(out camera) && camera.transform == currentSourceObject.transform)
-                        increaseWeight = false;
-
-                    break;
+                    if(coroutines.ContainsKey(camera.name))
+                    {
+                        StopCoroutine(coroutines[camera.name]);
+                        coroutines[camera.name] = StartCoroutine(IncreaseWeight(camera.name));
+                    }
+                    else
+                        coroutines.Add(camera.name, StartCoroutine(IncreaseWeight(camera.name)));
+                }
             }
         }
 
-        void UpdateSourceWeight(float delta)
+        void ColliderTriggerExitHandler(Collider collider)
         {
-            currentSourceObject.weight = Mathf.Clamp01(currentSourceObject.weight + delta);
-
-            if (aimConstraint && rigBuilder)
+            if (collider.GetComponent<CharacterController>() && collider.TryFindComponent(out Camera camera))
             {
-                WeightedTransformArray sourceObjects = aimConstraint.data.sourceObjects;
+                if (coroutines.ContainsKey(camera.name))
+                {
+                    StopCoroutine(coroutines[camera.name]);
+                    coroutines[camera.name] = StartCoroutine(DecreaseWeight(camera.name));
+                }
+                else
+                    coroutines.Add(camera.name, StartCoroutine(DecreaseWeight(camera.name)));
+            }
+        }
 
-                for (int i = 0; i < sourceObjects.Count; i++)
-                    if (sourceObjects[i].transform.name == currentSourceObject.transform.name)
-                    {
-                        sourceObjects.SetWeight(i, currentSourceObject.weight);
+        int FindTransformIndex(string transformName)
+        {
+            if (!aimConstraint || !rigBuilder)
+                return -1;
 
-                        aimConstraint.data.sourceObjects = sourceObjects;
-                        rigBuilder.Build();
+            List<WeightedTransform> sourceObjectsList = aimConstraint.data.sourceObjects.ToList();
+            return sourceObjectsList.FindIndex(s => s.transform.name == transformName);
+        }
 
-                        break;
-                    }
+        IEnumerator DecreaseWeight(string transformName)
+        {
+            if (!aimConstraint || !rigBuilder)
+                yield break;
+
+            /// Recherche de l'objet
+            int i = FindTransformIndex(transformName);
+
+            /// Si objet non trouvé, on arrête la coroutine
+            if (i < 0)
+                yield break;
+
+            while (aimConstraint.data.sourceObjects.GetWeight(i) > 0)
+            {
+                WeightedTransformArray transforms = aimConstraint.data.sourceObjects;
+                transforms.SetWeight(i, Mathf.Clamp01(aimConstraint.data.sourceObjects.GetWeight(i) - Time.deltaTime / weightTransitionDuration));
+
+                aimConstraint.data.sourceObjects = transforms;
+                rigBuilder.Build();
+
+                yield return null;
+            }
+        }
+
+        IEnumerator IncreaseWeight(string transformName)
+        {
+            if(!aimConstraint || !rigBuilder)
+                yield break;
+
+            /// Recherche de l'objet
+            int i = FindTransformIndex(transformName);
+
+            /// Si objet non trouvé, on arrête la coroutine
+            if (i < 0)
+                yield break;
+
+            while(aimConstraint.data.sourceObjects.GetWeight(i) < 1)
+            {
+                WeightedTransformArray transforms = aimConstraint.data.sourceObjects;
+                transforms.SetWeight(i, Mathf.Clamp01(aimConstraint.data.sourceObjects.GetWeight(i) + Time.deltaTime / weightTransitionDuration));
+                
+                aimConstraint.data.sourceObjects = transforms;
+                rigBuilder.Build();
+
+                yield return null;
             }
         }
     }
