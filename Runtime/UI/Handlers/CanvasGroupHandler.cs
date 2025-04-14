@@ -187,7 +187,9 @@ namespace Devloader.UI.Handlers
             }
 
             effect.duration = duration;
-            effect.SetToBegin(1);
+
+            if(visibilityOnStart != VisibilityOnStart.LeaveItAsItIs)
+                effect.SetToBegin(1);
 
             return effect;
         }
