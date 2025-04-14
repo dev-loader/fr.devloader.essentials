@@ -1,5 +1,5 @@
-/// Copyright 2024, Antonin Boureau, All rights reserved.
-/// Version 20240525
+/// Copyright 2025, Antonin Boureau, All rights reserved.
+/// Version 20250414
 
 using System.Collections.Generic;
 
