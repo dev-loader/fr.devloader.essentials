@@ -185,7 +185,11 @@
         }
     ],
     "m_GroupDatas": [],
-    "m_StickyNoteDatas": [],
+    "m_StickyNoteDatas": [
+        {
+            "m_Id": "752d96f73f184922ad6d2fc56826a5d6"
+        }
+    ],
     "m_Edges": [
         {
             "m_OutputSlot": {
@@ -2505,6 +2509,26 @@
     },
     "m_Labels": [],
     "m_Space": 0
+}
+
+{
+    "m_SGVersion": 0,
+    "m_Type": "UnityEditor.ShaderGraph.StickyNoteData",
+    "m_ObjectId": "752d96f73f184922ad6d2fc56826a5d6",
+    "m_Title": "Deprecated",
+    "m_Content": "Use \"Foliage\" or \"Foliage (windy)\" instead\n",
+    "m_TextSize": 0,
+    "m_Theme": 0,
+    "m_Position": {
+        "serializedVersion": "2",
+        "x": 325.0,
+        "y": 296.0,
+        "width": 237.0,
+        "height": 100.0
+    },
+    "m_Group": {
+        "m_Id": ""
+    }
 }
 
 {

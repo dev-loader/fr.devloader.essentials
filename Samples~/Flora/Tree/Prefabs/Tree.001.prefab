@@ -176,7 +176,7 @@ GameObject:
   m_Component:
   - component: {fileID: 475245016396529318}
   - component: {fileID: 5823854206721230340}
-  m_Layer: 2
+  m_Layer: 0
   m_Name: NavMeshObstacle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -340,7 +340,7 @@ PrefabInstance:
     - target: {fileID: 8628665689840024274, guid: 44ef643fd775833468918d39a776c197,
         type: 3}
       propertyPath: m_StaticEditorFlags
-      value: 1
+      value: 2147483647
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects:
@@ -388,24 +388,27 @@ LODGroup:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2926120939570148034}
   serializedVersion: 2
-  m_LocalReferencePoint: {x: 0.3235743, y: 4.4385476, z: 0.1233716}
-  m_Size: 7.4890223
+  m_LocalReferencePoint: {x: 0.32357454, y: 4.056847, z: 0.12337136}
+  m_Size: 8.113694
   m_FadeMode: 1
-  m_AnimateCrossFading: 0
+  m_AnimateCrossFading: 1
   m_LastLODIsBillboard: 0
   m_LODs:
   - screenRelativeHeight: 0.9778924
     fadeTransitionWidth: 1
     renderers:
     - renderer: {fileID: 1588189664655428307}
+    - renderer: {fileID: 8639034738685905776}
   - screenRelativeHeight: 0.39134395
     fadeTransitionWidth: 1
     renderers:
     - renderer: {fileID: 4488600029855780473}
+    - renderer: {fileID: 8639034738685905776}
   - screenRelativeHeight: 0.013611762
     fadeTransitionWidth: 1
     renderers:
     - renderer: {fileID: 6772247950318881577}
+    - renderer: {fileID: 8639034738685905776}
   m_Enabled: 1
 --- !u!1 &6479947634411682076 stripped
 GameObject:
@@ -439,6 +442,12 @@ CapsuleCollider:
 --- !u!23 &6772247950318881577 stripped
 MeshRenderer:
   m_CorrespondingSourceObject: {fileID: -459058141754309446, guid: 44ef643fd775833468918d39a776c197,
+    type: 3}
+  m_PrefabInstance: {fileID: 2619620177811345299}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &8639034738685905776 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: -3188892688128277277, guid: 44ef643fd775833468918d39a776c197,
     type: 3}
   m_PrefabInstance: {fileID: 2619620177811345299}
   m_PrefabAsset: {fileID: 0}
