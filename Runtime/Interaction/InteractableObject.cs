@@ -1,20 +1,33 @@
 /// Copyright 2024, Antonin Boureau, All rights reserved.
-/// Version 20240621
+/// Version 20240811
 
 using Devloader.Extensions;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
-
-#if !ENABLE_LEGACY_INPUT_MANAGER
 using UnityEngine.InputSystem;
-#endif
 
 namespace Devloader.Interaction
 {
     [AddComponentMenu("Devloader/Interaction/InteractableObject")]
     public class InteractableObject : MonoBehaviour
     {
+        public enum EventCondition
+        {
+            ByColliderCollision,
+            ByColliderTrigger,
+            ByDistance,
+            ByPointer,
+        }
+
+        public enum EventTrigger
+        {
+            KeyOrInputAction,
+            OnEnter,
+            OnExit,
+        }
+
+
         public enum InteractionMethod
         {
             ByCollider,
@@ -36,58 +49,74 @@ namespace Devloader.Interaction
             Canceled
         }
 
-        [SerializeField] private InteractionMethod interactionMethod = InteractionMethod.ByCollider;
-        [SerializeField] private InteractionTrigger interactionAction = InteractionTrigger.KeyOrInputAction;
+        [Header("Main settings")]
+        [SerializeField] private InteractionMethod _interactionMethod = InteractionMethod.ByCollider;
+        [SerializeField] private InteractionTrigger _interactionTrigger = InteractionTrigger.KeyOrInputAction;
         [Space]
 
-        [SerializeField] private float triggerDistance = 1;
-        [SerializeField] private GameObject overrideDistanceGameObjectSource = null;
-        [Space]
-
-        [SerializeField] private GameObject overridePointer = null;
-
-#if ENABLE_LEGACY_INPUT_MANAGER
-        [Space, SerializeField] private KeyCode interactionKey = KeyCode.Mouse0;
+        [SerializeField] private ActionState _stateOnConditionFulfilled = ActionState.Canceled;
+#if ENABLE_INPUT_SYSTEM
+        [SerializeField] private InputActionReference _pressActionReference;
 #else
-        [Space, SerializeField] private InputActionReference clickActionReference;
-        [Space, SerializeField] private InputActionReference positionActionReference;
-
-        [SerializeField] private ActionState inputActionState = ActionState.Canceled;
+        [SerializeField] private KeyCode _interactionKey = KeyCode.Mouse0;
 #endif
 
-        [Space, SerializeField] private UnityEvent<bool> onConditionFilled = new UnityEvent<bool>();
-        [Space, SerializeField] private UnityEvent onInteractionPerformed = new UnityEvent();
+        [Header("Collider method settings")]
+        [SerializeField] LayerMask _colliderLayerMask;
 
-        private bool isEntered = false;
+        [Header("Distance method settings")]
+        [SerializeField] private float _triggerDistance = 1;
+        [SerializeField] private GameObject _overrideDistanceGameObjectSource = null;
+        [Space]
 
-        private Vector2 pointerPosition;
-        private float distance;
-        private RaycastHit pointerHit;
+        [Header("Pointer method settings")]
+        [SerializeField] LayerMask _raycastLayerMask;
+        [SerializeField] private GameObject _overridePointer = null;
+        [Space]
 
-        private List<InteractableColliderHandler> colliderHandlers = new List<InteractableColliderHandler>();
+#if ENABLE_INPUT_SYSTEM
+        [SerializeField] private InputActionReference _pressPositionActionReference;
+#else
+        [SerializeField] private KeyCode _interactionKey = KeyCode.Mouse0;
+#endif
 
-#if !ENABLE_LEGACY_INPUT_MANAGER
+        [Header("Event settings")]
+        [Space, SerializeField] private UnityEvent<bool> _onConditionFulfilled = new UnityEvent<bool>();
+
+        private UnityEvent _onPressStarted = new UnityEvent();
+        [Space, SerializeField] private UnityEvent _onPressPerformed = new UnityEvent();
+        private UnityEvent _onPressCanceled = new UnityEvent();
+
+        private bool _isEntered = false;
+
+        private Vector2 _pointerPosition;
+        private float _distance;
+        private RaycastHit _pointerHit;
+
+        private List<InteractableColliderHandler> _colliderHandlers = new List<InteractableColliderHandler>();
+
+#if ENABLE_INPUT_SYSTEM
         private void OnEnable()
         {
-            if(clickActionReference)
-                clickActionReference.action.Enable();
+            if(_pressActionReference)
+                _pressActionReference.action.Enable();
 
-            if(positionActionReference)
-                positionActionReference.action.Enable();
+            if(_pressPositionActionReference)
+                _pressPositionActionReference.action.Enable();
         }
 
         private void OnDisable()
         {
-            if (clickActionReference)
-                clickActionReference.action.Disable();
+            if (_pressActionReference)
+                _pressActionReference.action.Disable();
 
-            if (positionActionReference)
-                positionActionReference.action.Disable();
+            if (_pressPositionActionReference)
+                _pressPositionActionReference.action.Disable();
         }
 
         private void Start()
         {
-            if(interactionMethod == InteractionMethod.ByCollider)
+            if(_interactionMethod == InteractionMethod.ByCollider)
             {
                 Collider collider;
 
@@ -98,160 +127,163 @@ namespace Devloader.Interaction
                         {
                             InteractableColliderHandler handler = c.ValidateComponent<InteractableColliderHandler>();
 
-                            if (interactionAction == InteractionTrigger.OnEnter)
-                                handler.OnEntered.AddListener(isEntered => onInteractionPerformed.Invoke());
-                            else if(interactionAction == InteractionTrigger.OnExit)
-                                handler.OnExit.AddListener(isEntered => onInteractionPerformed.Invoke());
-                            else if(interactionAction == InteractionTrigger.KeyOrInputAction)
+                            if (_interactionTrigger == InteractionTrigger.OnEnter)
+                                handler.OnEntered.AddListener(isEntered => _onPressPerformed.Invoke());
+                            else if(_interactionTrigger == InteractionTrigger.OnExit)
+                                handler.OnExit.AddListener(isEntered => _onPressPerformed.Invoke());
+                            else if(_interactionTrigger == InteractionTrigger.KeyOrInputAction)
                             {
                                 handler.OnEntered.AddListener(ColliderTriggerHandler);
                             }
 
-                            colliderHandlers.Add(handler);
+                            _colliderHandlers.Add(handler);
                         }
                 }
                 else
-                    colliderHandlers = new() { this.ValidateComponent<InteractableColliderHandler>() };
+                    _colliderHandlers = new() { this.ValidateComponent<InteractableColliderHandler>() };
             }
 
-            if(interactionAction == InteractionTrigger.KeyOrInputAction)
-                switch (inputActionState)
+            if(_interactionTrigger == InteractionTrigger.KeyOrInputAction)
+                switch (_stateOnConditionFulfilled)
                 {
                     case ActionState.Started:
-                        clickActionReference.action.started += InputActionHandler;
+                        _pressActionReference.action.started += HandlePressAction;
                         break;
 
                     case ActionState.Performed:
-                        clickActionReference.action.performed += InputActionHandler;
+                        _pressActionReference.action.performed += HandlePressAction;
                         break;
 
                     case ActionState.Canceled:
-                        clickActionReference.action.canceled += InputActionHandler;
+                        _pressActionReference.action.canceled += HandlePressAction;
                         break;
                 }
 
-            if(positionActionReference)
-                positionActionReference.action.performed += context => pointerPosition = positionActionReference.action.ReadValue<Vector2>();
+            if(_pressPositionActionReference)
+                _pressPositionActionReference.action.performed += HandlePositionAction;
         }
 #endif
 
         private void FixedUpdate()
         {
-            switch(interactionMethod)
+            switch(_interactionMethod)
             {
                 case InteractionMethod.ByPointer:
-                    if (overridePointer)
-                        pointerPosition = Camera.WorldToScreenPoint(overridePointer.transform.position);
-#if ENABLE_LEGACY_INPUT_MANAGER
+                    if (_overridePointer)
+                        _pointerPosition = Camera.WorldToScreenPoint(_overridePointer.transform.position);
+#if !ENABLE_INPUT_SYSTEM
                     else
-                        pointerPosition = Input.mousePosition;
+                        _pointerPosition = Input.mousePosition;
 #endif
                     break;
 
                 case InteractionMethod.ByDistance:
-                    Transform source = overrideDistanceGameObjectSource ? overrideDistanceGameObjectSource.transform : Camera.transform;
-                    distance = Vector3.Distance(source.position, transform.position);
+                    Transform source = _overrideDistanceGameObjectSource ? _overrideDistanceGameObjectSource.transform : Camera.transform;
+                    _distance = Vector3.Distance(source.position, transform.position);
                     break;
             }
         }
 
         private void Update()
         {
-            switch (interactionMethod)
+            switch (_interactionMethod)
             {
                 case InteractionMethod.ByCollider:
-#if ENABLE_LEGACY_INPUT_MANAGER
-                    if(interactionAction == InteractionTrigger.KeyOrInputAction && isEntered && Input.GetKeyUp(interactionKey))
-                        onInteractionPerformed.Invoke();
+#if !ENABLE_INPUT_SYSTEM
+                    if(_interactionTrigger == InteractionTrigger.KeyOrInputAction && _isEntered && Input.GetKeyUp(_interactionKey))
+                        _onInteractionPerformed.Invoke();
 #endif
                     break;
 
                 case InteractionMethod.ByDistance:
-                    if (distance <= triggerDistance)
+                    if (_distance <= _triggerDistance)
                     {
-                        onConditionFilled.Invoke(true);
+                        _onConditionFulfilled.Invoke(true);
 
-                        if (interactionAction == InteractionTrigger.OnEnter && !isEntered)
-                            onInteractionPerformed.Invoke();
-#if ENABLE_LEGACY_INPUT_MANAGER
-                        else if (interactionAction == InteractionTrigger.KeyOrInputAction && Input.GetKeyUp(interactionKey))
-                            onInteractionPerformed.Invoke();
+                        if (_interactionTrigger == InteractionTrigger.OnEnter && !_isEntered)
+                            _onPressPerformed.Invoke();
+#if !ENABLE_INPUT_SYSTEM
+                        else if (_interactionTrigger == InteractionTrigger.KeyOrInputAction && Input.GetKeyUp(_interactionKey))
+                            _onInteractionPerformed.Invoke();
 #endif
 
-                        isEntered = true;
+                        _isEntered = true;
                     }
                     else
                     {
-                        onConditionFilled.Invoke(false);
+                        _onConditionFulfilled.Invoke(false);
 
-                        if (interactionAction == InteractionTrigger.OnExit && isEntered)
-                            onInteractionPerformed.Invoke();
+                        if (_interactionTrigger == InteractionTrigger.OnExit && _isEntered)
+                            _onPressPerformed.Invoke();
 
-                        isEntered = false;
+                        _isEntered = false;
                     }
 
                     break;
 
                 case InteractionMethod.ByPointer:
-#if ENABLE_LEGACY_INPUT_MANAGER
+#if ENABLE_INPUT_SYSTEM
 #elif !UNITY_ANDROID || !UNITY_IOS
                     if (Mouse.current is null)
                     {
-                        isEntered = false;
+                        _isEntered = false;
                         return;
                     }
 #else
                     if (Touchscreen.current is null || Touchscreen.current.touches.Count <= 0)
                     {
-                        if (interactionAction == InteractionTrigger.OnExit && isEntered)
-                            onInteractionPerformed.Invoke();
+                        if (_interactionAction == InteractionTrigger.OnExit && _isEntered)
+                            _onInteractionPerformed.Invoke();
 
-                        isEntered = false;
+                        _isEntered = false;
                         return;
                     }
 #endif
 
                     if (
                         Physics.Raycast(
-                            Camera.ScreenPointToRay(pointerPosition),
-                            out pointerHit,
-                            Camera.farClipPlane
+                            Camera.ScreenPointToRay(_pointerPosition),
+                            out _pointerHit,
+                            Camera.farClipPlane,
+                            _raycastLayerMask
                         ) &&
-                        (pointerHit.collider.gameObject == gameObject || pointerHit.collider.transform.IsChildOf(transform))
+                        (_pointerHit.collider.gameObject == gameObject || _pointerHit.collider.transform.IsChildOf(transform))
                     )
                     {
-                        onConditionFilled.Invoke(true);
+                        _onConditionFulfilled.Invoke(true);
 
-                        if (interactionAction == InteractionTrigger.OnEnter && !isEntered)
-                            onInteractionPerformed.Invoke();
-#if ENABLE_LEGACY_INPUT_MANAGER
-                        else if (interactionAction == InteractionTrigger.KeyOrInputAction && Input.GetKeyUp(interactionKey))
-                            onInteractionPerformed.Invoke();
+                        if (_interactionTrigger == InteractionTrigger.OnEnter && !_isEntered)
+                            _onPressPerformed.Invoke();
+#if !ENABLE_INPUT_SYSTEM
+                        else if (_interactionTrigger == InteractionTrigger.KeyOrInputAction && Input.GetKeyUp(_interactionKey))
+                            _onInteractionPerformed.Invoke();
 #endif
-                        isEntered = true;
+                        _isEntered = true;
                     }
                     else
                     {
-                        onConditionFilled.Invoke(false);
+                        _onConditionFulfilled.Invoke(false);
 
-                        if (interactionAction == InteractionTrigger.OnExit && isEntered)
-                            onInteractionPerformed.Invoke();
+                        if (_interactionTrigger == InteractionTrigger.OnExit && _isEntered)
+                            _onPressPerformed.Invoke();
 
-                        isEntered = false;
+                        _isEntered = false;
                     }
 
                     break;
             }
         }
 
-        private void ColliderTriggerHandler(InteractableColliderEventData eventData) => isEntered = eventData.isInCollider && isActiveAndEnabled;
+        private void ColliderTriggerHandler(InteractableColliderEventData eventData) => _isEntered = eventData.isInCollider && _colliderLayerMask.Includes(eventData.other.gameObject.layer) && isActiveAndEnabled;
 
-#if !ENABLE_LEGACY_INPUT_MANAGER
-        private void InputActionHandler(InputAction.CallbackContext context)
+#if ENABLE_INPUT_SYSTEM
+        private void HandlePressAction(InputAction.CallbackContext context)
         {
-            if(isActiveAndEnabled && isEntered)
-                onInteractionPerformed.Invoke();
+            if(isActiveAndEnabled && _isEntered)
+                _onPressPerformed.Invoke();
         }
+
+        private void HandlePositionAction(InputAction.CallbackContext context) => _pointerPosition = context.ReadValue<Vector2>();
 #endif
 
         private Camera Camera { get => Camera.main ?? Camera.current; }
