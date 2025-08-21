@@ -1,7 +1,8 @@
-/// Copyright 2023, Antonin Boureau, All rights reserved.
-/// Version 20230626
+/// Copyright 2025, Antonin Boureau, All rights reserved.
+/// Version 20250821
 
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace Devloader.Utils
 {
@@ -76,6 +77,11 @@ namespace Devloader.Utils
                     }
                     break;
             }
+        }
+
+        private void OnDestroy()
+        {
+            SceneManager.MoveGameObjectToScene(gameObject, SceneManager.GetActiveScene());
         }
     }
 }
