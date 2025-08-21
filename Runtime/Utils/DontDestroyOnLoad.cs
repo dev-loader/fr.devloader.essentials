@@ -21,6 +21,8 @@ namespace Devloader.Utils
         [Header("Si la méthode est OnceObjectWithComponent")]
         public MonoBehaviour component;
 
+        private Transform _initialParent;
+
 #if UNITY_EDITOR
         private void OnValidate()
         {
@@ -49,7 +51,13 @@ namespace Devloader.Utils
 
         private void Awake()
         {
-            switch(method)
+            if (transform.parent)
+            {
+                _initialParent = transform.parent;
+                transform.parent = null;
+            }
+
+            switch (method)
             {
                 case Method.DontDestroyOnLoad:
                     DontDestroyOnLoad(gameObject);
@@ -82,6 +90,9 @@ namespace Devloader.Utils
         private void OnDestroy()
         {
             SceneManager.MoveGameObjectToScene(gameObject, SceneManager.GetActiveScene());
+
+            if (_initialParent)
+                transform.parent = _initialParent;
         }
     }
 }
