@@ -1,11 +1,10 @@
 /// Copyright 2025, Antonin Boureau, All rights reserved.
-/// Version 20250210
+/// Version 20250821
 
-using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
 
-namespace Devloader.Utils.EditorOnly
+namespace Devloader.EditorOnly.Utils
 {
     public class DefineSymbolsUtils
     {
