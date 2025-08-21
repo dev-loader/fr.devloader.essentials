@@ -1,5 +1,5 @@
 /// Copyright 2024, Antonin Boureau, All rights reserved.
-/// Version 20240811
+/// Version 20240821
 
 using Devloader.Extensions;
 using System.Collections.Generic;
@@ -143,7 +143,7 @@ namespace Devloader.Interaction
                     _colliderHandlers = new() { this.ValidateComponent<InteractableColliderHandler>() };
             }
 
-            if(_interactionTrigger == InteractionTrigger.KeyOrInputAction)
+            if(_pressActionReference && _interactionTrigger == InteractionTrigger.KeyOrInputAction)
                 switch (_stateOnConditionFulfilled)
                 {
                     case ActionState.Started:
