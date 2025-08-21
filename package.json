@@ -6,7 +6,7 @@
     "email": "contact@devloader.fr",
     "url": "https://devloader.fr"
   },
-  "version": "1.0.0-0.8.1+20250821",
+  "version": "1.0.0-0.9.0+20250821",
   "unity": "2022.3",
   "unityRelease": "20f1",
   "description": "Provides some resources like materials and shaders",
@@ -17,11 +17,6 @@
     "shaders"
   ],
   "samples": [
-    {
-      "displayName": "Feature Samples",
-      "description": "Provides some prefabs with features ready to go.",
-      "path": "Samples~/Features"
-    },
     {
       "displayName": "Material Samples (Built-In)",
       "description": "Provides some colors using \"Standard\" and \"UI/Default\" shaders.",
