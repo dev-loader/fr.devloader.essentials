@@ -1,11 +1,14 @@
 /// Copyright 2025, Antonin Boureau, All rights reserved.
-/// Version 20250821
+/// Version 20250822
 
 using UnityEngine;
 
+#if UNITY_EDITOR
 using Devloader.Utils.EditorOnly;
-using System.ComponentModel;
+#endif
+
 using System.Collections.Generic;
+using System.ComponentModel;
 
 namespace Devloader.EditorOnly.TagsAndLayers
 {
@@ -27,16 +30,20 @@ namespace Devloader.EditorOnly.TagsAndLayers
 
         public void CheckTag()
         {
+#if UNITY_EDITOR
             if (!protectedTags.Contains(_tagName))
                 TagUtils.Validate(_tagName);
+#endif
 
             gameObject.tag = _tagName;
         }
 
         public void DeleteTag(string tagName)
         {
+#if UNITY_EDITOR
             if (!protectedTags.Contains(tagName))
                 TagUtils.Remove(tagName);
+#endif
         }
 
         public string TagName => _tagName;
