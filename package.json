@@ -6,7 +6,7 @@
     "email": "contact@devloader.fr",
     "url": "https://devloader.fr"
   },
-  "version": "1.0.0-0.9.1+20250822",
+  "version": "1.0.0-0.10.0+20250917",
   "unity": "2022.3",
   "unityRelease": "20f1",
   "description": "Provides some resources like materials and shaders",
