@@ -6,26 +6,33 @@ namespace Devloader.Utils
 {
     public class DelayAction : MonoBehaviour
     {
-        [SerializeField] private float delay;
+        [SerializeField] private float _delay;
+        [SerializeField] private bool _useFixedUpdate;
         [Space]
 
-        [SerializeField] private UnityEvent action = new UnityEvent();
+        [SerializeField] private UnityEvent _action = new UnityEvent();
 
         public void RunDelay()
         {
             StopAllCoroutines();
-            StartCoroutine(DelayCoroutine(delay));
+            StartCoroutine(DelayCoroutine(_delay, () => _action.Invoke()));
         }
 
         public void RunDelay(float delay)
         {
             StopAllCoroutines();
-            StartCoroutine(DelayCoroutine(delay));
+            StartCoroutine(DelayCoroutine(delay, () => _action.Invoke()));
         }
 
-        public IEnumerator DelayCoroutine(float delay)
+        public void RunDelay(float delay, UnityAction action)
         {
-            if (delay <= 0)
+            StopAllCoroutines();
+            StartCoroutine(DelayCoroutine(delay, action));
+        }
+
+        public IEnumerator DelayCoroutine(float delay, UnityAction action = null)
+        {
+            if (delay <= 0 || action == null)
                 yield break;
 
             float t = 0;
@@ -33,7 +40,11 @@ namespace Devloader.Utils
             while(t < delay)
             {
                 t += Time.deltaTime;
-                yield return null;
+
+                if(_useFixedUpdate)
+                    yield return new WaitForFixedUpdate();
+                else
+                    yield return null;
             }
 
             action.Invoke();
