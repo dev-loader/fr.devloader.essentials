@@ -310,7 +310,7 @@ namespace Devloader.Extensions
         /// </summary>
         /// <param name="component"></param>
         /// <param name="foundComponent">The component found. If several components exists, the first one will be returned.</param>
-        /// <returns>Return true in any case.</returns>
+        /// <returns>Return true if the component was found, false if a component was created.</returns>
         public static bool ValidateComponent<T>(this Component component, out T foundComponent) where T : Component
         {
             if (!component.TryGetComponent(out foundComponent))
@@ -319,6 +319,8 @@ namespace Devloader.Extensions
 #if UNITY_EDITOR
                 UnityEditor.EditorUtility.SetDirty(component);
 #endif
+
+                return false;
             }
 
             return true;
