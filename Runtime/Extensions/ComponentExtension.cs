@@ -1,5 +1,5 @@
 ﻿/// Copyright 2025, Antonin Boureau, All rights reserved.
-/// Version 20250206
+/// Version 20251113
 
 using System.Collections.Generic;
 using UnityEngine;
@@ -281,7 +281,7 @@ namespace Devloader.Extensions
         }
 
         /// <summary>
-        ///	Try to get the specified Component on the GameObject
+        ///	Get the specified Component on the GameObject
         ///	If not exists, a new Component is created on it
         ///	
         ///	If you don't need to create a component, just use gameObject.TryGetComponent<T>(out T component) instead
@@ -300,6 +300,28 @@ namespace Devloader.Extensions
 #endif
                 return t;
             }
+        }
+
+        /// <summary>
+        ///	Get the specified Component on the GameObject
+        ///	If not exists, a new Component is created on it
+        ///	
+        ///	If you don't need to create a component, just use gameObject.TryGetComponent<T>(out T component) instead
+        /// </summary>
+        /// <param name="component"></param>
+        /// <param name="foundComponent">The component found. If several components exists, the first one will be returned.</param>
+        /// <returns>Return true in any case.</returns>
+        public static bool ValidateComponent<T>(this Component component, out T foundComponent) where T : Component
+        {
+            if (!component.TryGetComponent(out foundComponent))
+            {
+                foundComponent = component.gameObject.AddComponent<T>();
+#if UNITY_EDITOR
+                UnityEditor.EditorUtility.SetDirty(component);
+#endif
+            }
+
+            return true;
         }
 
         /// <summary>
