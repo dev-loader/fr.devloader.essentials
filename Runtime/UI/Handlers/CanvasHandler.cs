@@ -40,7 +40,7 @@ namespace Devloader.UI.Handlers
         #endregion
 
 
-        [System.Obsolete]
+        [System.Obsolete("Use instance instead")]
         public static CanvasHandler Instance { get => _instance ? _instance : ComponentExtension.FindFirst<CanvasHandler>(true, true); }
         public static CanvasHandler instance { get => _instance ? _instance : ComponentExtension.FindFirst<CanvasHandler>(true, true); }
 
