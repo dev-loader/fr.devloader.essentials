@@ -94,7 +94,7 @@ namespace Devloader.UI.Handlers
         public void HideAll()
         {
             foreach (KeyValuePair<string, CanvasGroupHandler> pair in _groups)
-                if(!pair.Value.Hidden)
+                if(!pair.Value.hidden)
                     pair.Value.Hide();
         }
 
@@ -145,7 +145,7 @@ namespace Devloader.UI.Handlers
         {
             if(_groups.ContainsKey(name))
             {
-                if (_groups[name].Hidden)
+                if (_groups[name].hidden)
                     Show(_groups[name]);
                 else
                     Hide(_groups[name]);
