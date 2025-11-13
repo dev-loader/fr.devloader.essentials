@@ -1,5 +1,5 @@
 /// Copyright 2025, Antonin Boureau, All rights reserved.
-/// Version 20250414
+/// Version 20251113
 
 using System.Collections.Generic;
 
@@ -36,33 +36,35 @@ namespace Devloader.UI.Handlers
         #region Inspector
 
         [Header("Main settings")]
-        [SerializeField, Tooltip("Used to identify the group in the Dev_CanvasHandler")] string groupName = "";
-        [SerializeField] VisibilityOnStart visibilityOnStart = VisibilityOnStart.Hide;
+        [SerializeField, Tooltip("Used to identify the group in the Dev_CanvasHandler")] string _groupName = "";
+        [SerializeField] VisibilityOnStart _visibilityOnStart = VisibilityOnStart.Hide;
         [Space]
 
         [Header("Transition settings")]
-        [SerializeField] TransitionEffect showTransition = TransitionEffect.Fade;
-        [SerializeField] float showTransitionDuration = .2f;
+        [SerializeField] TransitionEffect _showTransition = TransitionEffect.Fade;
+        [SerializeField] float _showTransitionDuration = .2f;
 
-        [SerializeField] TransitionEffect hideTransition = TransitionEffect.Fade;
-        [SerializeField] float hideTransitionDuration = .2f;
+        [SerializeField] TransitionEffect _hideTransition = TransitionEffect.Fade;
+        [SerializeField] float _hideTransitionDuration = .2f;
         [Space]
 
         [Header("Events")]
-        [SerializeField] UnityEvent OnShow = new UnityEvent();
-        [SerializeField] UnityEvent OnHide = new UnityEvent();
+        [SerializeField] UnityEvent _onShow = new UnityEvent();
+        [SerializeField] UnityEvent _onHide = new UnityEvent();
 
         [Header("For debug purposes")]
-        [SerializeField] CanvasGroup canvasGroup;
+        [SerializeField] CanvasGroup _canvasGroup;
 
         #endregion
 
-        AbstractEffect showEffect;
-        AbstractEffect hideEffect;
+        AbstractEffect _showEffect;
+        AbstractEffect _hideEffect;
 
-        bool started;
+        bool _started;
 
+        [System.Obsolete("Use hidden instead")]
         public bool Hidden { get; private set; } = true;
+        public bool hidden { get; private set; } = true;
 
 #if UNITY_EDITOR
         private void OnValidate() => InitComponent();
@@ -75,24 +77,24 @@ namespace Devloader.UI.Handlers
             InitComponent();
             InitEffects();
 
-            CanvasHandler.Instance.AddCanvas(groupName, this);
+            CanvasHandler.instance.AddCanvas(_groupName, this);
         }
 
         private void OnEnable()
         {
-            if (started)
+            if (_started)
                 Show();
 
-            showEffect.events.AddListener(OnEffectEvent);
-            hideEffect.events.AddListener(OnEffectEvent);
+            _showEffect.events.AddListener(OnEffectEvent);
+            _hideEffect.events.AddListener(OnEffectEvent);
         }
 
         private void Start()
         {
-            if (visibilityOnStart == VisibilityOnStart.Show)
+            if (_visibilityOnStart == VisibilityOnStart.Show)
                 Show();
 
-            started = true;
+            _started = true;
         }
 
         private void OnDisable() => Hide(false);
@@ -100,46 +102,46 @@ namespace Devloader.UI.Handlers
         private void OnDestroy()
         {
             if(CanvasHandler.HasInstance)
-                CanvasHandler.Instance.RemoveCanvas(groupName);
+                CanvasHandler.instance.RemoveCanvas(_groupName);
         }
 
         private bool GroupNameAlreadyExists(string groupName)
         {
-            List<CanvasGroupHandler> groups = new List<CanvasGroupHandler>(FindObjectsOfType<CanvasGroupHandler>());
-            CanvasGroupHandler group = groups.Find(group => group.groupName == groupName);
+            List<CanvasGroupHandler> groups = new List<CanvasGroupHandler>(ComponentExtension.FindAll<CanvasGroupHandler>());
+            CanvasGroupHandler group = groups.Find(group => group._groupName == groupName);
 
             return group;
         }
 
         public void Hide(bool effect = true)
         {
-            canvasGroup.interactable = false;
-            canvasGroup.blocksRaycasts = false;
+            _canvasGroup.interactable = false;
+            _canvasGroup.blocksRaycasts = false;
 
-            hideEffect?.SetToBegin(-1);
+            _hideEffect?.SetToBegin(-1);
 
             if(effect)
-                hideEffect?.Run(-1);
+                _hideEffect?.Run(-1);
         }
 
         private void InitComponent()
         {
-            if (!canvasGroup)
-                canvasGroup = this.ValidateComponent<CanvasGroup>();
+            if (!_canvasGroup)
+                _canvasGroup = this.ValidateComponent<CanvasGroup>();
 
-            if(groupName.Trim().Length <= 0)
+            if(_groupName.Trim().Length <= 0)
             {
-                int instanceIndex = (new List<CanvasGroupHandler>(FindObjectsOfType<CanvasGroupHandler>())).IndexOf(this);
+                int instanceIndex = (new List<CanvasGroupHandler>(ComponentExtension.FindAll<CanvasGroupHandler>())).IndexOf(this);
 
                 while (GroupNameAlreadyExists("Group " + (++instanceIndex))) ;
-                groupName = "Group " + instanceIndex;
+                _groupName = "Group " + instanceIndex;
             }
 
 #if UNITY_EDITOR
             if(Application.isPlaying)
             {
-                canvasGroup.interactable = !Application.IsPlaying(gameObject);
-                canvasGroup.blocksRaycasts = !Application.IsPlaying(gameObject);
+                _canvasGroup.interactable = !Application.IsPlaying(gameObject);
+                _canvasGroup.blocksRaycasts = !Application.IsPlaying(gameObject);
             }
 #else
             canvasGroup.interactable = false;
@@ -149,8 +151,8 @@ namespace Devloader.UI.Handlers
 
         private void InitEffects()
         {
-            showEffect = InitEffect(showTransition, showTransitionDuration);
-            hideEffect = InitEffect(hideTransition, hideTransitionDuration);
+            _showEffect = InitEffect(_showTransition, _showTransitionDuration);
+            _hideEffect = InitEffect(_hideTransition, _hideTransitionDuration);
         }
 
         private AbstractEffect InitEffect(TransitionEffect transition, float duration)
@@ -172,14 +174,14 @@ namespace Devloader.UI.Handlers
                 case TransitionEffect.DragBackward:
 
                 case TransitionEffect.ZoomIn:
-                    effect = this.ValidateComponent<UniformRescaleEffect>();
+                    effect = this.ValidateComponent<FadeTransformScale>();
 
                     effect.firstValue = 1;
                     effect.finalValue = 0;
                     break;
 
                 case TransitionEffect.ZoomOut:
-                    effect = this.ValidateComponent<UniformRescaleEffect>();
+                    effect = this.ValidateComponent<FadeTransformScale>();
 
                     effect.firstValue = 0;
                     effect.finalValue = 1;
@@ -188,7 +190,7 @@ namespace Devloader.UI.Handlers
 
             effect.duration = duration;
 
-            if(visibilityOnStart != VisibilityOnStart.LeaveItAsItIs)
+            if(_visibilityOnStart != VisibilityOnStart.LeaveItAsItIs)
                 effect.SetToBegin(1);
 
             return effect;
@@ -202,24 +204,24 @@ namespace Devloader.UI.Handlers
             switch (eventType)
             {
                 case EffectEvent.EventType.Started:
-                    canvasGroup.interactable = false;
-                    canvasGroup.blocksRaycasts = false;
+                    _canvasGroup.interactable = false;
+                    _canvasGroup.blocksRaycasts = false;
                     break;
 
                 case EffectEvent.EventType.Completed:
                     if (effect.direction > 0)
                     {
-                        OnShow.Invoke();
+                        _onShow.Invoke();
 
-                        canvasGroup.interactable = true;
-                        canvasGroup.blocksRaycasts = true;
+                        _canvasGroup.interactable = true;
+                        _canvasGroup.blocksRaycasts = true;
 
-                        Hidden = false;
+                        hidden = false;
                     }
                     else if (effect.direction < 0)
                     {
-                        OnHide.Invoke();
-                        Hidden = true;
+                        _onHide.Invoke();
+                        hidden = true;
                     }
 
                     break;
@@ -232,10 +234,10 @@ namespace Devloader.UI.Handlers
                 Hide();
             else
             {
-                hideEffect.SetToBegin(-1);
+                _hideEffect.SetToBegin(-1);
 
-                showEffect.SetToBegin(1);
-                showEffect.Run(1);
+                _showEffect.SetToBegin(1);
+                _showEffect.Run(1);
             }
         }
     }
