@@ -6,7 +6,7 @@ using Devloader.Utils;
 using Devloader.Extensions;
 
 
-#if !ENABLE_LEGACY_INPUT_MANAGER
+#if ENABLE_INPUT_SYSTEM
 using UnityEngine.InputSystem;
 #endif
 
@@ -31,7 +31,6 @@ namespace Devloader.CameraManagement
         [Space]
 
         [SerializeField] private Vector3 lookAtOffset = Vector3.up * 0.7f;
-        [SerializeField] private Vector3 lookAtSmoothSpeed = Vector3.up * 0.7f;
 
         [Header("Camera settings")]
         [SerializeField] private Transform cameraTransform;
@@ -47,7 +46,7 @@ namespace Devloader.CameraManagement
 
         [SerializeField] private LayerMask obstacleLayerMask;
 
-#if !ENABLE_LEGACY_INPUT_MANAGER
+#if ENABLE_INPUT_SYSTEM
         [SerializeField] private InputActionReference zoomAxisDelta;
 #endif
         [SerializeField] private float zoomAxisSensitivity = 1;
@@ -63,10 +62,6 @@ namespace Devloader.CameraManagement
         [SerializeField] private bool isHitting = false;
 
         float cameraHitSphereRadius = 1f;
-
-#if ENABLE_LEGACY_INPUT_MANAGER
-        float wheelValue = 0;
-#endif
 
 #if UNITY_EDITOR
         private void OnValidate()
@@ -103,7 +98,7 @@ namespace Devloader.CameraManagement
             isMouseLock = lockCursorOnAwake;
         }
 
-#if !ENABLE_LEGACY_INPUT_MANAGER
+#if ENABLE_INPUT_SYSTEM
         protected override void OnEnable()
         {
             base.OnEnable();
@@ -127,7 +122,7 @@ namespace Devloader.CameraManagement
             UpdateEyeTrackerPosition();
         }
 
-#if ENABLE_LEGACY_INPUT_MANAGER
+#if !ENABLE_INPUT_SYSTEM
         private void FixedUpdate()
         {
             float wheelValue = Input.GetAxis("Mouse ScrollWheel");
@@ -217,7 +212,7 @@ namespace Devloader.CameraManagement
             eyeTrackerTransform.localPosition = offset;
         }
 
-#if !ENABLE_LEGACY_INPUT_MANAGER
+#if ENABLE_INPUT_SYSTEM
         private void ZoomAxisDeltaHandler(InputAction.CallbackContext context)
         {
             distanceRatio = Mathf.Clamp01(distanceRatio + context.ReadValue<float>() * Time.deltaTime * zoomAxisSensitivity);

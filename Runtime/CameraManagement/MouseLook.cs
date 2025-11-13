@@ -3,7 +3,7 @@
 
 using UnityEngine;
 
-#if !ENABLE_LEGACY_INPUT_MANAGER
+#if ENABLE_INPUT_SYSTEM
 using UnityEngine.InputSystem;
 #endif
 
@@ -13,7 +13,7 @@ public class MouseLook : MonoBehaviour
     public enum RotationAxis { MouseXAndY = 0, MouseX = 1, MouseY = 2 }
     [SerializeField] RotationAxis axis = RotationAxis.MouseX;
 
-#if ENABLE_LEGACY_INPUT_MANAGER
+#if !ENABLE_INPUT_SYSTEM
     [SerializeField] private string xAxisInputName = "Mouse X";
     [SerializeField] private string yAxisInputName = "Mouse Y";
 #else
@@ -21,7 +21,7 @@ public class MouseLook : MonoBehaviour
     Vector2 delta;
 #endif
 
-#if ENABLE_LEGACY_INPUT_MANAGER
+#if !ENABLE_INPUT_SYSTEM
     [SerializeField] float sensitivityX = 15f;
     [SerializeField] float sensitivityY = 15f;
 #else
@@ -61,7 +61,7 @@ public class MouseLook : MonoBehaviour
         }
     }
 
-#if !ENABLE_LEGACY_INPUT_MANAGER
+#if ENABLE_INPUT_SYSTEM
     protected virtual void OnEnable()
     {
         deltaInputValue.action.performed += UpdateDelta;
@@ -86,7 +86,7 @@ public class MouseLook : MonoBehaviour
         }
     }
 
-#if !ENABLE_LEGACY_INPUT_MANAGER
+#if ENABLE_INPUT_SYSTEM
     protected virtual void OnDisable()
     {
         deltaInputValue.action.performed -= UpdateDelta;
@@ -100,7 +100,7 @@ public class MouseLook : MonoBehaviour
         {
             if (axis == RotationAxis.MouseXAndY)
             {
-#if ENABLE_LEGACY_INPUT_MANAGER
+#if !ENABLE_INPUT_SYSTEM
                 float rotationX = transform.localEulerAngles.y + Input.GetAxis(xAxisInputName) * sensitivityX;
                 rotationY += Input.GetAxis(yAxisInputName) * sensitivityY;
 #else
@@ -113,7 +113,7 @@ public class MouseLook : MonoBehaviour
             }
             else if (axis == RotationAxis.MouseX)
             {
-#if ENABLE_LEGACY_INPUT_MANAGER
+#if !ENABLE_INPUT_SYSTEM
                 transform.Rotate(0, Input.GetAxis(xAxisInputName) * sensitivityX, 0);
 #else
                 transform.Rotate(0, delta.x * sensitivityX, 0);
@@ -121,7 +121,7 @@ public class MouseLook : MonoBehaviour
             }
             else
             {
-#if ENABLE_LEGACY_INPUT_MANAGER
+#if !ENABLE_INPUT_SYSTEM
                 rotationY += Input.GetAxis(yAxisInputName) * sensitivityY;
 #else
                 rotationY += delta.y * sensitivityY;
@@ -132,7 +132,7 @@ public class MouseLook : MonoBehaviour
         }
     }
 
-#if !ENABLE_LEGACY_INPUT_MANAGER
+#if ENABLE_INPUT_SYSTEM
     private void ResetDelta(InputAction.CallbackContext obj) => delta = Vector2.zero;
 #endif
 
@@ -148,7 +148,7 @@ public class MouseLook : MonoBehaviour
         sensitivityY = verticalAxis;
     }
 
-#if !ENABLE_LEGACY_INPUT_MANAGER
+#if ENABLE_INPUT_SYSTEM
     private void UpdateDelta(InputAction.CallbackContext obj) => delta = obj.ReadValue<Vector2>();
 #endif
 
