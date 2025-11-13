@@ -1,5 +1,5 @@
-/// Copyright 2024, Antonin Boureau, All rights reserved.
-/// Version 20240525
+/// Copyright 2025, Antonin Boureau, All rights reserved.
+/// Version 20251113
 
 using Devloader.Extensions;
 
@@ -20,36 +20,39 @@ namespace Devloader.UI.Handlers
             WorldSpaceCameraDirection = 3
         }
 
-        static CanvasHandler instance;
+        static CanvasHandler _instance;
 
         #region Inspector
 
-        [SerializeField, Tooltip("Set the canvas at the same height that the camera")] PositionMethod positionMethod = PositionMethod.ScreenSpaceOverlay;
-        [SerializeField, Tooltip("Distance between the camera and the canvas for world space placement")] float cameraDistance = 1;
+        [SerializeField, Tooltip("Set the canvas at the same height that the camera")] PositionMethod _positionMethod = PositionMethod.ScreenSpaceOverlay;
+        [SerializeField, Tooltip("Distance between the camera and the canvas for world space placement")] float _cameraDistance = 1;
 
-        [Space, SerializeField] AudioClip showSoundFX;
-        [SerializeField] AudioClip hideSoundFX;
+        [Space, SerializeField] AudioClip _showSoundFX;
+        [SerializeField] AudioClip _hideSoundFX;
 
         #endregion
 
         #region Privates
 
-        Dictionary<string, CanvasGroupHandler> groups = new Dictionary<string, CanvasGroupHandler>();
-        AudioSource audioSource = null;
+        Dictionary<string, CanvasGroupHandler> _groups = new Dictionary<string, CanvasGroupHandler>();
+        AudioSource _audioSource = null;
 
         #endregion
 
-        public static CanvasHandler Instance { get => instance ? instance : ComponentExtension.FindObject<CanvasHandler>(true, true); }
 
-        public static bool HasInstance { get => instance; }
+        [System.Obsolete]
+        public static CanvasHandler Instance { get => _instance ? _instance : ComponentExtension.FindFirst<CanvasHandler>(true, true); }
+        public static CanvasHandler instance { get => _instance ? _instance : ComponentExtension.FindFirst<CanvasHandler>(true, true); }
+
+        public static bool HasInstance { get => _instance; }
 
 #if UNITY_EDITOR
         private void OnValidate()
         {
-            if (positionMethod == PositionMethod.ScreenSpaceOverlay || positionMethod == PositionMethod.ScreenCamera)
-                cameraDistance = 0;
-            else if(cameraDistance < (Camera.main??Camera.current).nearClipPlane)
-                cameraDistance = Camera.main.nearClipPlane;
+            if (_positionMethod == PositionMethod.ScreenSpaceOverlay || _positionMethod == PositionMethod.ScreenCamera)
+                _cameraDistance = 0;
+            else if(_cameraDistance < (Camera.main??Camera.current).nearClipPlane)
+                _cameraDistance = Camera.main.nearClipPlane;
 
             ValidateAudioSource();
         }
@@ -57,9 +60,9 @@ namespace Devloader.UI.Handlers
 
         private void Awake()
         {
-            if (!instance)
-                instance = this;
-            else if (instance != this)
+            if (!_instance)
+                _instance = this;
+            else if (_instance != this)
                 this.HardDestroy();
         }
 
@@ -67,44 +70,44 @@ namespace Devloader.UI.Handlers
 
         public void AddCanvas(string name, CanvasGroupHandler canvas)
         {
-            if(!groups.ContainsKey(name))
-                groups.Add(name, canvas);
+            if(!_groups.ContainsKey(name))
+                _groups.Add(name, canvas);
         }
 
         public void Hide(string name)
         {
-            if (groups.ContainsKey(name))
-                Hide(groups[name]);
+            if (_groups.ContainsKey(name))
+                Hide(_groups[name]);
         }
 
         private void Hide(CanvasGroupHandler handler)
         {
             handler.Hide();
 
-            if (hideSoundFX)
+            if (_hideSoundFX)
             {
-                audioSource.clip = hideSoundFX;
-                audioSource.Play();
+                _audioSource.clip = _hideSoundFX;
+                _audioSource.Play();
             }
         }
 
         public void HideAll()
         {
-            foreach (KeyValuePair<string, CanvasGroupHandler> pair in groups)
+            foreach (KeyValuePair<string, CanvasGroupHandler> pair in _groups)
                 if(!pair.Value.Hidden)
                     pair.Value.Hide();
         }
 
         public void RemoveCanvas(string name)
         {
-            if (groups.ContainsKey(name))
-                groups.Remove(name);
+            if (_groups.ContainsKey(name))
+                _groups.Remove(name);
         }
 
         public void Show(string name)
         {
-            if (groups.ContainsKey(name))
-                Show(groups[name]);
+            if (_groups.ContainsKey(name))
+                Show(_groups[name]);
         }
 
         private void Show(CanvasGroupHandler handler)
@@ -113,16 +116,16 @@ namespace Devloader.UI.Handlers
 
             if (cameraTransform)
             {
-                Vector3 position = cameraTransform.position + cameraTransform.forward * cameraDistance;
+                Vector3 position = cameraTransform.position + cameraTransform.forward * _cameraDistance;
 
-                if (positionMethod == PositionMethod.WorldSpaceEyeLevel)
+                if (_positionMethod == PositionMethod.WorldSpaceEyeLevel)
                     position.y = cameraTransform.position.y;
 
                 transform.position = position;
 
                 Vector3 target = cameraTransform.position;
 
-                if (positionMethod == PositionMethod.WorldSpaceEyeLevel)
+                if (_positionMethod == PositionMethod.WorldSpaceEyeLevel)
                     target.y = position.y;
 
                 transform.LookAt(target);
@@ -131,30 +134,30 @@ namespace Devloader.UI.Handlers
 
             handler.Show();
 
-            if (showSoundFX)
+            if (_showSoundFX)
             {
-                audioSource.clip = showSoundFX;
-                audioSource.Play();
+                _audioSource.clip = _showSoundFX;
+                _audioSource.Play();
             }
         }
 
         public void Toggle(string name)
         {
-            if(groups.ContainsKey(name))
+            if(_groups.ContainsKey(name))
             {
-                if (groups[name].Hidden)
-                    Show(groups[name]);
+                if (_groups[name].Hidden)
+                    Show(_groups[name]);
                 else
-                    Hide(groups[name]);
+                    Hide(_groups[name]);
             }
         }
 
         private void ValidateAudioSource()
         {
-            if (!audioSource && (showSoundFX || hideSoundFX) && !TryGetComponent(out audioSource))
-                audioSource = this.ValidateComponent<AudioSource>();
-            else if (!showSoundFX && !hideSoundFX && audioSource)
-                Destroy(audioSource);
+            if (!_audioSource && (_showSoundFX || _hideSoundFX) && !TryGetComponent(out _audioSource))
+                _audioSource = this.ValidateComponent<AudioSource>();
+            else if (!_showSoundFX && !_hideSoundFX && _audioSource)
+                Destroy(_audioSource);
         }
     }
 }
