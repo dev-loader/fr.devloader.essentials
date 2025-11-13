@@ -109,7 +109,7 @@ namespace Devloader.Utils
                     transform.parent = _initialParent;
             }
 #if UNITY_EDITOR
-            else if(_debugOnDestroyinEditor)
+            else if(_debugOnDestroyInEditor)
                 Debug.LogWarning("A Don't Destroy On Load element was destroyed because no scene was loaded");
 #else
             else
