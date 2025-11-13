@@ -1,8 +1,10 @@
 ﻿/// Copyright 2025, Antonin Boureau, All rights reserved.
-/// Version 20250411
+/// Version 20251113
 
 using UnityEngine;
 using Devloader.Utils;
+using Devloader.Extensions;
+
 
 #if !ENABLE_LEGACY_INPUT_MANAGER
 using UnityEngine.InputSystem;
@@ -85,12 +87,14 @@ namespace Devloader.CameraManagement
 
         private void Awake()
         {
-            // On récupère tous les sceneManagements
-            MouseLookAround[] mouseLookArounds = FindObjectsOfType<MouseLookAround>();
+            Object[] mouseLookArounds = this.FindSimilar();
 
             // S'il y en a déjà un, on supprime celui-ci
             if (mouseLookArounds.Length > 1)
+            {
                 Destroy(gameObject);
+                return;
+            }
 
             // Make the rigid body not change rotation
             if (TryGetComponent(out Rigidbody rb))
