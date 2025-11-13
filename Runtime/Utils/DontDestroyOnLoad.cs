@@ -1,6 +1,7 @@
 /// Copyright 2025, Antonin Boureau, All rights reserved.
-/// Version 20250821
+/// Version 20251113
 
+using Devloader.Extensions;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -12,23 +13,33 @@ namespace Devloader.Utils
         public enum Method
         {
             DontDestroyOnLoad,
+            [System.Obsolete, HideInInspector]
             OnceObjectWithTag,
-            OnceObjectWithComponent
+            OnlyObjectWithTag,
+            [System.Obsolete, HideInInspector]
+            OnceObjectWithComponent,
+            OnlyObjectWithComponent,
         }
 
-        public Method method;
+        [Header("Main settings")]
+        [SerializeField] Method _method;
 
-        [Header("Si la méthode est OnceObjectWithComponent")]
-        public MonoBehaviour component;
+        [Header("OnlyObjectWithComponent settings")]
+        [SerializeField] MonoBehaviour _component;
+
+        [Header("OnlyObjectWithComponent Settings")]
+        [SerializeField] bool _debugOnDestroyInEditor = false;
 
         private Transform _initialParent;
 
 #if UNITY_EDITOR
+        [System.Obsolete]
         private void OnValidate()
         {
-            switch (method)
+            switch (_method)
             {
                 case Method.OnceObjectWithTag:
+                case Method.OnlyObjectWithTag:
                     GameObject[] gameObjects = GameObject.FindGameObjectsWithTag(tag);
 
                     if (gameObjects.Length > 1)
@@ -37,12 +48,13 @@ namespace Devloader.Utils
                     break;
 
                 case Method.OnceObjectWithComponent:
-                    if(component)
+                case Method.OnlyObjectWithComponent:
+                    if (_component)
                     {
-                        Object[] objects = FindObjectsOfType(component.GetType());
+                        Object[] objects = _component.FindSimilar();
 
                         if (objects.Length > 1)
-                            Debug.LogWarning("Attention, au moins un autre objet avec un composant " + component.GetType() + " est présent dans la scène");
+                            Debug.LogWarning("Attention, au moins un autre objet avec un composant " + _component.GetType() + " est présent dans la scène");
                     }
                     break;
             }
@@ -57,13 +69,13 @@ namespace Devloader.Utils
                 transform.parent = null;
             }
 
-            switch (method)
+            switch (_method)
             {
                 case Method.DontDestroyOnLoad:
                     DontDestroyOnLoad(gameObject);
                     break;
 
-                case Method.OnceObjectWithTag:
+                case Method.OnlyObjectWithTag:
                     GameObject[] gameObjects = GameObject.FindGameObjectsWithTag(tag);
 
                     if (gameObjects.Length > 1)
@@ -73,10 +85,10 @@ namespace Devloader.Utils
 
                     break;
 
-                case Method.OnceObjectWithComponent:
-                    if (component)
+                case Method.OnlyObjectWithComponent:
+                    if (_component)
                     {
-                        Object[] objects = FindObjectsOfType(component.GetType());
+                        Object[] objects = _component.FindSimilar();
 
                         if (objects.Length > 1)
                             Destroy(gameObject);
@@ -89,10 +101,24 @@ namespace Devloader.Utils
 
         private void OnDestroy()
         {
-            SceneManager.MoveGameObjectToScene(gameObject, SceneManager.GetActiveScene());
+            if(SceneManager.loadedSceneCount > 0)
+            {
+                SceneManager.MoveGameObjectToScene(gameObject, SceneManager.GetActiveScene());
 
-            if (_initialParent)
-                transform.parent = _initialParent;
+                if (_initialParent)
+                    transform.parent = _initialParent;
+            }
+#if UNITY_EDITOR
+            else if(_debugOnDestroyinEditor)
+                Debug.LogWarning("A Don't Destroy On Load element was destroyed because no scene was loaded");
+#else
+            else
+                Debug.LogWarning("A Don't Destroy On Load element was destroyed because no scene was loaded");
+#endif
         }
+
+        public Method method { get => _method; set => _method = value; }
+
+        public MonoBehaviour component { get =>  _component; set => _component = value; }
     }
 }
