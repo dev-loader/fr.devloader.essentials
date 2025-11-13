@@ -1,11 +1,12 @@
-/// Copyright 2023, Antonin Boureau, All rights reserved.
-/// Version 20230626
+/// Copyright 2025, Antonin Boureau, All rights reserved.
+/// Version 20251113
 
 using UnityEngine;
 using Devloader.Extensions;
 
 namespace Devloader.Effects
 {
+    [System.Obsolete("Use FadeTransformScale instead")]
     public class UniformRescaleEffect : AbstractEffect
     {
         [Header("Transform où appliquer le rescale")]
