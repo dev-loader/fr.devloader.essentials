@@ -144,8 +144,8 @@ namespace Devloader.UI.Handlers
                 _canvasGroup.blocksRaycasts = !Application.IsPlaying(gameObject);
             }
 #else
-            canvasGroup.interactable = false;
-            canvasGroup.blocksRaycasts = false;
+            _canvasGroup.interactable = false;
+            _canvasGroup.blocksRaycasts = false;
 #endif
         }
 
