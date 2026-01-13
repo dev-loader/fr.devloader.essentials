@@ -1,9 +1,14 @@
+/// Copyright 2026, Antonin Boureau, All rights reserved.
+/// Version 20260113
+
+using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.Events;
 
 namespace Devloader.Utils
 {
+    [Obsolete("Please use Devloader.Events.DelayedAction system instead")]
     public class DelayAction : MonoBehaviour
     {
         [SerializeField] private float _delay;
@@ -37,11 +42,11 @@ namespace Devloader.Utils
 
             float t = 0;
 
-            while(t < delay)
+            while (t < delay)
             {
                 t += Time.deltaTime;
 
-                if(_useFixedUpdate)
+                if (_useFixedUpdate)
                     yield return new WaitForFixedUpdate();
                 else
                     yield return null;
