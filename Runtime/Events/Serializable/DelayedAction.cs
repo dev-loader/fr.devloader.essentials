@@ -1,5 +1,5 @@
 /// Copyright 2026, Antonin Boureau, All rights reserved.
-/// Version 20260113
+/// Version 20260116
 
 using System;
 using System.Threading;
@@ -94,12 +94,12 @@ namespace Devloader.Events
 
                 if (_useFixedUpdate)
                 {
-                    await Task.Yield();
+                    await Task.Delay((int)(Time.fixedDeltaTime * 1000f));
                     elapsed += Time.fixedDeltaTime;
                 }
                 else
                 {
-                    await Task.Yield();
+                    await Task.Delay((int)(Time.deltaTime * 1000f));
                     elapsed += Time.deltaTime;
                 }
             }
