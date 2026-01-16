@@ -14,6 +14,12 @@
     "precompiledReferences": [],
     "autoReferenced": true,
     "defineConstraints": [],
-    "versionDefines": [],
+    "versionDefines": [
+        {
+            "name": "com.unity.modules.uielements",
+            "expression": "",
+            "define": "UNITY_UI_TOOLKIT"
+        }
+    ],
     "noEngineReferences": false
 }
