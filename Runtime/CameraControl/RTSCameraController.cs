@@ -1,25 +1,17 @@
-/// Copyright 2024, Antonin Boureau, All rights reserved.
-/// Version 20241115
-
-using System.Collections;
-using System.Collections.Generic;
+/// Copyright 2026, Antonin Boureau, All rights reserved.
+/// Version 20260116
 
 using UnityEngine;
 using UnityEngine.Events;
 
 using Devloader.Utils;
 using UnityEngine.EventSystems;
-using UnityEngine.UIElements;
-using UnityEngine.UI;
-
-
-
 
 #if ENABLE_INPUT_SYSTEM
 using UnityEngine.InputSystem;
 #endif
 
-namespace Devloader.CameraManagement
+namespace Devloader.CameraControl
 {
     public class RTSCameraController : MonoBehaviour
     {

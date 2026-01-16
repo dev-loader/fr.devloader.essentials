@@ -1,10 +1,9 @@
-﻿/// Copyright 2025, Antonin Boureau, All rights reserved.
-/// Version 20251113
+﻿/// Copyright 2026, Antonin Boureau, All rights reserved.
+/// Version 20260116
 
 using UnityEngine;
 using Devloader.Utils;
 using Devloader.Extensions;
-
 
 #if ENABLE_INPUT_SYSTEM
 using UnityEngine.InputSystem;
@@ -14,9 +13,9 @@ using UnityEngine.InputSystem;
 using UnityEditor;
 #endif
 
-namespace Devloader.CameraManagement
+namespace Devloader.CameraControl
 {
-    [AddComponentMenu("Devloader/Camera/Mouse Look Around")]
+    [AddComponentMenu("Devloader/Camera Control/Mouse Look Around")]
     public class MouseLookAround : MouseLook
     {
         [Header("Cursor settings")]

@@ -1,12 +1,12 @@
-/// Copyright 2024, Antonin Boureau, All rights reserved.
-/// Version 20240612
+/// Copyright 2026, Antonin Boureau, All rights reserved.
+/// Version 20260116
 
-using Devloader.CameraManagement;
+using Devloader.CameraControl;
 
 using UnityEditor;
 using UnityEngine;
 
-namespace Devloader.CustomInspector.CameraManagement
+namespace Devloader.CustomInspector.CameraControl
 {
 #if UNITY_EDITOR
     [CustomEditor(typeof(MouseLookAround))]
