@@ -6,15 +6,18 @@
     "email": "contact@devloader.fr",
     "url": "https://devloader.fr"
   },
-  "version": "1.0.0-1.3.0+20260116",
+  "version": "1.0.0-1.4.0+20260117",
   "unity": "2022.3",
   "unityRelease": "20f1",
   "description": "Provides some resources like materials and shaders",
   "keywords": [
     "essentials",
     "materials",
+    "prefabs",
     "scripts",
-    "shaders"
+    "shaders",
+    "trees",
+    "water"
   ],
   "samples": [
     {
@@ -43,14 +46,14 @@
       "path": "Samples~/Textures"
     },
     {
-      "displayName": "[Environment] Flora Samples",
+      "displayName": "[Environment] Flora Samples (URP)",
       "description": "Provides some brushes and trees.",
-      "path": "Samples~/Flora"
+      "path": "Samples~/Flora/URP"
     },
     {
-      "displayName": "[Environment] Water Samples",
+      "displayName": "[Environment] Water Samples (URP)",
       "description": "Provides some water.",
-      "path": "Samples~/Water"
+      "path": "Samples~/Water/URP"
     }
   ]
 }
