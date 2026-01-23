@@ -108,6 +108,10 @@ namespace Devloader.Events
             action.Invoke();
         }
 
+        public UnityEvent callBacks => _action;
+
+        public float delay { get => _delay; set => _delay = value; }
+
         public int count => _action.GetPersistentEventCount();
     }
 }
