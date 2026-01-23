@@ -68,13 +68,15 @@ namespace Devloader.CameraControl
             if (PrefabUtility.IsPartOfAnyPrefab(gameObject))
                 return;
 
-            UpdateCameraPosition();
+            UpdateCameraPosition(false);
+            UpdateCameraLookAt(false);
             UpdateEyeTrackerPosition();
         }
 
         private void Reset()
         {
-            UpdateCameraPosition();
+            UpdateCameraPosition(false);
+            UpdateCameraLookAt(false);
             UpdateEyeTrackerPosition();
         }
 #endif
