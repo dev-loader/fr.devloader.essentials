@@ -6,7 +6,7 @@
     "email": "contact@devloader.fr",
     "url": "https://devloader.fr"
   },
-  "version": "1.0.0-1.4.0+20260117",
+  "version": "1.0.0-1.5.0+20260123",
   "unity": "2022.3",
   "unityRelease": "20f1",
   "description": "Provides some resources like materials and shaders",
@@ -29,6 +29,11 @@
       "displayName": "Material Samples (URP)",
       "description": "Provides some colors using \"URP/Lit\" and \"UI/Default\" shaders.",
       "path": "Samples~/Materials/URP"
+    },
+    {
+      "displayName": "Material Samples (HDRP)",
+      "description": "Provides some colors using \"HDRP/Lit\" and \"UI/Default\" shaders.",
+      "path": "Samples~/Materials/HDRP"
     },
     {
       "displayName": "Shape Samples",
