@@ -1,5 +1,5 @@
-﻿/// Copyright 2025, Antonin Boureau, All rights reserved.
-/// Version 20251113
+﻿/// Copyright 2026, Antonin Boureau, All rights reserved.
+/// Version 20260123
 
 using System.Collections.Generic;
 using UnityEngine;
@@ -219,6 +219,138 @@ namespace Devloader.Extensions
             }
             else
                 return component;
+        }
+
+        /// <summary>
+        /// Search the first specified Component in the scene.
+        /// If not exists, a new object with the Component is created as a new child of parent, if createIfNotExist is true.
+        /// 
+        /// You can modify gameObject parameters (like name or SetActive(bool)) using the returned component.gameObject.
+        /// </summary>
+        public static bool TryFindFirst<T>(out T component, bool inactiveToo = true, bool createIfNotExist = false, Transform parent = null) where T : Component
+        {
+            component = Object.FindFirstObjectByType<T>(inactiveToo ? FindObjectsInactive.Include : FindObjectsInactive.Exclude);
+
+            if (!component && createIfNotExist)
+            {
+                GameObject gameObject = new GameObject(typeof(T).Name);
+
+                if (parent)
+                {
+                    gameObject.transform.SetParent(parent);
+
+                    gameObject.transform.localPosition = Vector3.zero;
+                    gameObject.transform.localRotation = Quaternion.identity;
+                    gameObject.transform.localScale = Vector3.one;
+                }
+
+#if UNITY_EDITOR
+                UnityEditor.EditorUtility.SetDirty(gameObject);
+#endif
+
+                component = gameObject.AddComponent<T>();
+            }
+
+            return component != null;
+        }
+
+        /// <summary>
+        /// Search the first specified Component type in the scene.
+        /// If not exists, a new object with the Component is created as a new child of parent, if createIfNotExist is true.
+        /// 
+        /// You can modify gameObject parameters (like name or SetActive(bool)) using the returned component.gameObject.
+        /// </summary>
+        public static bool TryFindFirst(out Object component, System.Type type, bool inactiveToo = true, bool createIfNotExist = false, Transform parent = null)
+        {
+            component = Object.FindFirstObjectByType(type, inactiveToo ? FindObjectsInactive.Include : FindObjectsInactive.Exclude);
+
+            if (!component && createIfNotExist)
+            {
+                GameObject gameObject = new GameObject(type.Name);
+
+                if (parent)
+                {
+                    gameObject.transform.SetParent(parent);
+
+                    gameObject.transform.localPosition = Vector3.zero;
+                    gameObject.transform.localRotation = Quaternion.identity;
+                    gameObject.transform.localScale = Vector3.one;
+                }
+
+#if UNITY_EDITOR
+                UnityEditor.EditorUtility.SetDirty(gameObject);
+#endif
+
+                component = gameObject.AddComponent(type);
+            }
+
+            return component != null;
+        }
+
+        /// <summary>
+        /// Search a specified Component in the scene.
+        /// If not exists, a new object with the Component is created as a new child of parent, if createIfNotExist is true.
+        /// 
+        /// You can modify gameObject parameters (like name or SetActive(bool)) using the returned component.gameObject.
+        /// </summary>
+        public static bool TryFindAny<T>(out T component, bool inactiveToo = true, bool createIfNotExist = false, Transform parent = null) where T : Component
+        {
+            component = Object.FindAnyObjectByType<T>(inactiveToo ? FindObjectsInactive.Include : FindObjectsInactive.Exclude);
+
+            if (!component && createIfNotExist)
+            {
+                GameObject gameObject = new GameObject(typeof(T).Name);
+
+                if (parent)
+                {
+                    gameObject.transform.SetParent(parent);
+
+                    gameObject.transform.localPosition = Vector3.zero;
+                    gameObject.transform.localRotation = Quaternion.identity;
+                    gameObject.transform.localScale = Vector3.one;
+                }
+
+#if UNITY_EDITOR
+                UnityEditor.EditorUtility.SetDirty(gameObject);
+#endif
+
+                component = gameObject.AddComponent<T>();
+            }
+
+            return component != null;
+        }
+
+        /// <summary>
+        /// Search a specified Component in the scene.
+        /// If not exists, a new object with the Component is created as a new child of parent, if createIfNotExist is true.
+        /// 
+        /// You can modify gameObject parameters (like name or SetActive(bool)) using the returned component.gameObject.
+        /// </summary>
+        public static bool TryFindAny(out Object component, System.Type type, bool inactiveToo = true, bool createIfNotExist = false, Transform parent = null)
+        {
+            component = Object.FindAnyObjectByType(type, inactiveToo ? FindObjectsInactive.Include : FindObjectsInactive.Exclude);
+
+            if (!component && createIfNotExist)
+            {
+                GameObject gameObject = new GameObject(type.Name);
+
+                if (parent)
+                {
+                    gameObject.transform.SetParent(parent);
+
+                    gameObject.transform.localPosition = Vector3.zero;
+                    gameObject.transform.localRotation = Quaternion.identity;
+                    gameObject.transform.localScale = Vector3.one;
+                }
+
+#if UNITY_EDITOR
+                UnityEditor.EditorUtility.SetDirty(gameObject);
+#endif
+
+                component = gameObject.AddComponent(type);
+            }
+
+            return component != null;
         }
 #endif
 
