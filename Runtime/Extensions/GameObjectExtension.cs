@@ -1,5 +1,5 @@
-/// Copyright 2025, Antonin Boureau, All rights reserved.
-/// Version 20250210
+/// Copyright 2026, Antonin Boureau, All rights reserved.
+/// Version 20260126
 
 using System.Collections.Generic;
 using UnityEngine;
@@ -96,6 +96,12 @@ namespace Devloader.Extensions
 
             return gameObject;
         }
+
+        /// <summary>
+        /// Activate the GameObject if it was deactivated, deactivate it otherwise.
+        /// </summary>
+        /// <param name="gameObject"></param>
+        public static void ToggleActive(this GameObject gameObject) => gameObject.SetActive(!gameObject.activeSelf);
 
         /// <summary>
         /// Try to find a component in the children. Return true if a component is found and set the value in the out parameter, otherwise return false and set the out parameter to null.
