@@ -1,38 +1,44 @@
-using UnityEngine;
-using Devloader.Effects;
+/// Copyright 2026, Antonin Boureau, All rights reserved.
+/// Version 20260603
+
 using Devloader.Maths;
+using UnityEngine;
 
-public class FadeTransformPosition : AbstractEffect
+namespace Devloader.Effects
 {
-    [Header("References")]
-    [SerializeField] Transform _startPositionRef;
-    [SerializeField] Transform _finalPositionRef;
+    [AddComponentMenu("Devloader/Effects/Fade Transform Position")]
+    public class FadeTransformPosition : AbstractEffect
+    {
+        [Header("References")]
+        [SerializeField] Transform _startPositionRef;
+        [SerializeField] Transform _finalPositionRef;
 
-    [SerializeField] ClampedVector3 _clampedPosition = new ClampedVector3(Vector3.zero, new Vector3(1,0,1), Vector3.zero);
+        [SerializeField] RangedVector3 _clampedPosition = new RangedVector3(Vector3.zero, new Vector3(1, 0, 1), Vector3.zero);
 
 #if UNITY_EDITOR
-    protected override void OnValidate()
-    {
-        base.OnValidate();
+        protected override void OnValidate()
+        {
+            base.OnValidate();
 
-        if(_startPositionRef)
-            _clampedPosition.min = _startPositionRef.position;
+            if (_startPositionRef)
+                _clampedPosition.a = _startPositionRef.position;
 
-        if(_finalPositionRef)
-            _clampedPosition.max = _finalPositionRef.position;
-    }
+            if (_finalPositionRef)
+                _clampedPosition.b = _finalPositionRef.position;
+        }
 #endif
 
-    private void Awake() => processAction = value => transform.position = _clampedPosition.Lerp(value);
+        private void Awake() => ProcessAction = value => transform.position = _clampedPosition.Lerp(value);
 
-    public override void SetToBegin(int direction)
-    {
-        if (_startPositionRef)
-            _clampedPosition.min = _startPositionRef.position;
+        public override void SetToBegin(int direction)
+        {
+            if (_startPositionRef)
+                _clampedPosition.a = _startPositionRef.position;
 
-        if (_finalPositionRef)
-            _clampedPosition.max = _finalPositionRef.position;
+            if (_finalPositionRef)
+                _clampedPosition.b = _finalPositionRef.position;
 
-        base.SetToBegin(direction);
+            base.SetToBegin(direction);
+        }
     }
 }

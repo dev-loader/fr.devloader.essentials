@@ -1,5 +1,5 @@
-/// Copyright 2025, Antonin Boureau, All rights reserved.
-/// Version 20251113
+/// Copyright 2026, Antonin Boureau, All rights reserved.
+/// Version 20260603
 
 using UnityEngine;
 using UnityEngine.UI;
@@ -8,7 +8,7 @@ using Devloader.Extensions;
 
 namespace Devloader.Effects
 {
-    [AddComponentMenu("Devloader/Effects/FillImageEffect")]
+    [AddComponentMenu("Devloader/Effects/Fade Image Fill")]
     public class FadeImageFill : AbstractEffect
     {
         [SerializeField] Image _fillImage;
@@ -17,18 +17,17 @@ namespace Devloader.Effects
         protected override void OnValidate()
         {
             base.OnValidate();
-            this.ValidateComponent(out _fillImage);
+
+            if(!_fillImage)
+                this.ValidateComponent(out _fillImage);
         }
 #endif
 
-        private void Awake()
-        {
-            this.ValidateComponent(out _fillImage);
+        private void Awake() => ProcessAction = value=> _fillImage.fillAmount = value;
 
-            processAction = delegate (float value)
-            { _fillImage.fillAmount = value; };
-        }
+        [System.Obsolete("Use ImageComponent property instead")]
+        public Image fillImage => ImageComponent;
 
-        public Image fillImage => _fillImage;
+        public Image ImageComponent => _fillImage;
     }
 }

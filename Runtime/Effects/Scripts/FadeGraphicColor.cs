@@ -1,5 +1,5 @@
-/// Copyright 2025, Antonin Boureau, All rights reserved.
-/// Version 20251113
+/// Copyright 2026, Antonin Boureau, All rights reserved.
+/// Version 20260603
 
 using UnityEngine;
 using UnityEngine.UI;
@@ -25,24 +25,14 @@ namespace Devloader.Effects
         }
 #endif
 
-		private void Awake()
-		{
-			if (!_graphic)
-				return;
+		private void Awake() => ProcessAction = value => _graphic.color = Color.Lerp(_firstColor, _finalColor, value);
 
-			processAction = delegate (float value)
-			{
-				Color color = Color.Lerp(_firstColor, _finalColor, value);
-				_graphic.color = color;
-			};
-        }
+		[System.Obsolete("Use Color property instead")]
+		public Color color => Color;
+		public Color Color => _graphic.color;
 
-		public Color color => _graphic.color;
-
-        public Graphic graphic => _graphic;
+        [System.Obsolete("Use Graphic property instead")]
+        public Graphic graphic => Graphic;
+        public Graphic Graphic => _graphic;
     }
 }
-
-/// <summary>
-/// Version 20230212
-/// </summary>

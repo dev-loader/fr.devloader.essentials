@@ -1,12 +1,12 @@
-/// Copyright 2023, Antonin Boureau, All rights reserved.
-/// Version 20230626
+/// Copyright 2025, Antonin Boureau, All rights reserved.
+/// Version 20250603
 
 using UnityEngine;
 using UnityEngine.Events;
 
 namespace Devloader.Effects
 {
-    [AddComponentMenu("Devloader/Effects/EffectBehaviour")]
+    [AddComponentMenu("Dev'loader/Effects/Effect Behaviour")]
     public class EffectBehaviour : MonoBehaviour
     {
         public enum RunDirection
@@ -91,23 +91,23 @@ namespace Devloader.Effects
             switch (eventType)
             {
                 case EffectEvent.EventType.Started:
-                    if (effect.direction > 0)
+                    if (effect.Direction == AbstractEffect.EffectDirection.A2B)
                         onEffectInStarted.Invoke();
-                    else if (effect.direction < 0)
+                    else if (effect.Direction == AbstractEffect.EffectDirection.B2A)
                         onEffectOutStarted.Invoke();
 
                     onStarted.Invoke(effect);
                     break;
 
                 case EffectEvent.EventType.Completed:
-                    if (effect.direction > 0)
+                    if (effect.Direction == AbstractEffect.EffectDirection.A2B)
                     {
                         onEffectInFinished.Invoke();
 
                         if (inCallback != null)
                             inCallback.Invoke();
                     }
-                    else if (effect.direction < 0)
+                    else if (effect.Direction == AbstractEffect.EffectDirection.B2A)
                     {
                         onEffectOutFinished.Invoke();
 
@@ -119,12 +119,12 @@ namespace Devloader.Effects
                     break;
 
                 case EffectEvent.EventType.Progress:
-                    if (effect.direction > 0)
-                        onEffectInProgressed.Invoke(effect.progress);
-                    else if (effect.direction < 0)
-                        onEffectOutProgressed.Invoke(effect.progress);
+                    if (effect.Direction == AbstractEffect.EffectDirection.A2B)
+                        onEffectInProgressed.Invoke(effect.Progress);
+                    else if (effect.Direction == AbstractEffect.EffectDirection.B2A)
+                        onEffectOutProgressed.Invoke(effect.Progress);
 
-                    onProgressed.Invoke(effect, effect.progress);
+                    onProgressed.Invoke(effect, effect.Progress);
                     break;
 
                 case EffectEvent.EventType.Error:

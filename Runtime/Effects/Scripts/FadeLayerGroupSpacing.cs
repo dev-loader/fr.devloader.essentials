@@ -1,13 +1,30 @@
-using Devloader.Effects;
+/// Copyright 2026, Antonin Boureau, All rights reserved.
+/// Version 20260603
+
+using Devloader.Extensions;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class FadeLayerGroupSpacing : AbstractEffect
+namespace Devloader.Effects
 {
-    [SerializeField] HorizontalOrVerticalLayoutGroup _layoutGroup;
+    [AddComponentMenu("Devloader/Effects/Fade LayerGroup Spacing")]
+    public class FadeLayerGroupSpacing : AbstractEffect
+    {
+        [SerializeField] HorizontalOrVerticalLayoutGroup _layoutGroup;
 
-    [SerializeField] int _initial;
-    [SerializeField] int _final;
+        [SerializeField] int _initial;
+        [SerializeField] int _final;
 
-    private void Awake() => processAction = value => _layoutGroup.spacing = Mathf.Lerp(_initial, _final, value);
+#if UNITY_EDITOR
+        protected override void OnValidate()
+        {
+            base.OnValidate();
+
+            if (!_layoutGroup)
+                _layoutGroup = this.ValidateComponent<HorizontalOrVerticalLayoutGroup>();
+        }
+#endif
+
+        private void Awake() => ProcessAction = value => _layoutGroup.spacing = Mathf.Lerp(_initial, _final, value);
+    }
 }

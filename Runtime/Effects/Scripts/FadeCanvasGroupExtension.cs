@@ -1,5 +1,5 @@
-/// Copyright 2023, Antonin Boureau, All rights reserved.
-/// Version 20230626
+/// Copyright 2026, Antonin Boureau, All rights reserved.
+/// Version 20260603
 
 using UnityEngine;
 using UnityEngine.Events;
@@ -12,41 +12,43 @@ using UnityEditor.Events;
 
 namespace Devloader.Effects.Extensions
 {
-    [AddComponentMenu("Devloader/Effects/FadeCanvasGroupExtension")]
+    [AddComponentMenu("Devloader/Effects/Fade CanvasGroup Extension")]
     public class FadeCanvasGroupExtension : MonoBehaviour
     {
         [Header("Réglages de l'extension")]
-        public bool hideOnAwake = true;
-        public bool fadeHideOnAwake = false;
+        [SerializeField] bool _hideOnAwake = true;
+        [SerializeField] bool _fadeHideOnAwake = false;
 
         [Header("Réglages de l'effet")]
         [Min(.1f), Tooltip("En seconde")]
-        public float duration = 1;
+        [SerializeField] float _duration = 1;
 
         [Header("Evénements")]
-        public UnityEvent OnShow = new UnityEvent();
-        public UnityEvent OnHide = new UnityEvent();
+        [SerializeField] UnityEvent _onShow = new UnityEvent();
+        [SerializeField] UnityEvent _onHide = new UnityEvent();
 
-        public bool show { get; private set; }
+        [System.Obsolete("Use Display property instead")]
+        public bool show { get => Display; private set => Display = value; }
+        public bool Display { get; private set; }
 
 #if UNITY_EDITOR
         private void Reset()
         {
             FadeCanvasGroup fadeCanvasGroup = this.ValidateComponent<FadeCanvasGroup>();
 
-            if (fadeCanvasGroup.events.GetPersistentEventCount() <= 0)
-                UnityEventTools.AddPersistentListener(fadeCanvasGroup.events, OnFadeCanvasGroupEvent);
+            if (fadeCanvasGroup.Events.GetPersistentEventCount() <= 0)
+                UnityEventTools.AddPersistentListener(fadeCanvasGroup.Events, OnFadeCanvasGroupEvent);
 
-            if (fadeCanvasGroup.duration != duration)
-                duration = fadeCanvasGroup.duration;
+            if (fadeCanvasGroup.Duration != _duration)
+                _duration = fadeCanvasGroup.Duration;
         }
 
         private void OnValidate()
         {
             FadeCanvasGroup fadeCanvasGroup = this.ValidateComponent<FadeCanvasGroup>();
 
-            if (duration != fadeCanvasGroup.duration)
-                fadeCanvasGroup.duration = duration;
+            if (_duration != fadeCanvasGroup.Duration)
+                fadeCanvasGroup.Duration = _duration;
         }
     #endif
 
@@ -54,18 +56,18 @@ namespace Devloader.Effects.Extensions
         {
             FadeCanvasGroup fadeCanvasGroup = this.ValidateComponent<FadeCanvasGroup>();
 
-            if (duration != fadeCanvasGroup.duration)
-                fadeCanvasGroup.duration = duration;
+            if (_duration != fadeCanvasGroup.Duration)
+                fadeCanvasGroup.Duration = _duration;
 
-            if (hideOnAwake)
+            if (_hideOnAwake)
             {
-                if (fadeHideOnAwake)
+                if (_fadeHideOnAwake)
                     Show(false);
                 else
-                    Reset(true);
+                    ResetCanvasGroup(true);
             }
             else
-                Reset(false);
+                ResetCanvasGroup(false);
         }
 
         public void OnFadeCanvasGroupEvent(AbstractEffect effect, EffectEvent.EventType eventType)
@@ -81,33 +83,22 @@ namespace Devloader.Effects.Extensions
             switch (eventType)
             {
                 case EffectEvent.EventType.Started:
-                    fadeCanvasGroup.fadeCanvasGroup.interactable = false;
-                    fadeCanvasGroup.fadeCanvasGroup.blocksRaycasts = false;
-
-                    /*if (effect.direction > 0)
-                    {
-                        fadeCanvasGroup.fadeCanvasGroup.interactable = true;
-                        fadeCanvasGroup.fadeCanvasGroup.blocksRaycasts = true;
-                    }
-                    else if(effect.direction < 0)
-                    {
-                        fadeCanvasGroup.fadeCanvasGroup.interactable = false;
-                        fadeCanvasGroup.fadeCanvasGroup.blocksRaycasts = false;
-                    }*/
+                    fadeCanvasGroup.CanvasGroup.interactable = false;
+                    fadeCanvasGroup.CanvasGroup.blocksRaycasts = false;
                     break;
 
                 case EffectEvent.EventType.Completed:
-                    if (effect.direction > 0)
+                    if (effect.Direction > 0)
                     {
-                        OnShow.Invoke();
+                        _onShow.Invoke();
                         fadeCanvasGroup.SetToBegin(-1);
 
-                        fadeCanvasGroup.fadeCanvasGroup.interactable = true;
-                        fadeCanvasGroup.fadeCanvasGroup.blocksRaycasts = true;
+                        fadeCanvasGroup.CanvasGroup.interactable = true;
+                        fadeCanvasGroup.CanvasGroup.blocksRaycasts = true;
                     }
-                    else if (effect.direction < 0)
+                    else if (effect.Direction < 0)
                     {
-                        OnHide.Invoke();
+                        _onHide.Invoke();
                         fadeCanvasGroup.SetToBegin(1);
                     }
                     break;
@@ -118,28 +109,24 @@ namespace Devloader.Effects.Extensions
         {
             if (!isActiveAndEnabled)
             {
-                Reset(!show);
+                ResetCanvasGroup(!show);
                 return;
             }
 
             FadeCanvasGroup fadeCanvasGroup = this.ValidateComponent<FadeCanvasGroup>();
             fadeCanvasGroup.Run(show ? 1 : -1);
 
-            this.show = show;
+            Display = show;
         }
 
-        public void Reset(bool show)
+        public void ResetCanvasGroup(bool show)
         {
             FadeCanvasGroup fadeCanvasGroup = this.ValidateComponent<FadeCanvasGroup>();
-            fadeCanvasGroup.fadeCanvasGroup.interactable = !show;
-            fadeCanvasGroup.fadeCanvasGroup.blocksRaycasts = !show;
+            fadeCanvasGroup.CanvasGroup.interactable = !show;
+            fadeCanvasGroup.CanvasGroup.blocksRaycasts = !show;
 
             fadeCanvasGroup.SetToBegin(show ? 1 : -1);
-            this.show = !show;
+            Display = !show;
         }
     }
 }
-
-/// <summary>
-/// Version 20230306
-/// </summary>

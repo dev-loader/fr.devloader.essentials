@@ -1,20 +1,35 @@
-using Devloader.Effects;
+/// Copyright 2026, Antonin Boureau, All rights reserved.
+/// Version 20260603
+
+using Devloader.Extensions;
+using Devloader.Maths;
 using UnityEngine;
 
-public class FadeParticleSystemSimulationSpeed : AbstractEffect
+namespace Devloader.Effects
 {
-    [SerializeField] ParticleSystem[] _particleSystems = new ParticleSystem[0];
-
-    [Space]
-    [SerializeField] float _initialValue = .1f;
-    [SerializeField] float _finalValue = 1f;
-
-    private void Awake() => processAction = value =>
+    [AddComponentMenu("Devloader/Effects/Fade ParticleSystem SimulationSpeed")]
+    public class FadeParticleSystemSimulationSpeed : AbstractEffect
     {
-        foreach(ParticleSystem particleSystem in _particleSystems)
+        [SerializeField] ParticleSystem[] _particleSystems = new ParticleSystem[0];
+        [SerializeField] RangedFloat _simulationSpeedInterval = new RangedFloat(.1f, 1f);
+
+#if UNITY_EDITOR
+        protected override void OnValidate()
         {
-            ParticleSystem.MainModule module = particleSystem.main;
-            module.simulationSpeed = Mathf.Lerp(_initialValue, _finalValue, value);
+            base.OnValidate();
+
+            if (_particleSystems.Length == 0)
+                _particleSystems = this.FindComponents<ParticleSystem>();
         }
-    };
+#endif
+
+        private void Awake() => ProcessAction = value =>
+        {
+            foreach (ParticleSystem particleSystem in _particleSystems)
+            {
+                ParticleSystem.MainModule module = particleSystem.main;
+                module.simulationSpeed = Mathf.Lerp(_simulationSpeedInterval.a, _simulationSpeedInterval.b, value);
+            }
+        };
+    }
 }
