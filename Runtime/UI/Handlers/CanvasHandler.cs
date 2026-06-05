@@ -1,5 +1,5 @@
-/// Copyright 2025, Antonin Boureau, All rights reserved.
-/// Version 20251113
+/// Copyright 2026, Antonin Boureau, All rights reserved.
+/// Version 20260604
 
 using Devloader.Extensions;
 
@@ -39,12 +39,11 @@ namespace Devloader.UI.Handlers
 
         #endregion
 
+        [System.Obsolete("Use Instance property instead")]
+        public static CanvasHandler instance => Instance;
+        public static CanvasHandler Instance => _instance ? _instance : ComponentExtension.FindAny<CanvasHandler>(true, true);
 
-        [System.Obsolete("Use instance instead")]
-        public static CanvasHandler Instance { get => _instance ? _instance : ComponentExtension.FindFirst<CanvasHandler>(true, true); }
-        public static CanvasHandler instance { get => _instance ? _instance : ComponentExtension.FindFirst<CanvasHandler>(true, true); }
-
-        public static bool HasInstance { get => _instance; }
+        public static bool HasInstance => _instance != null;
 
 #if UNITY_EDITOR
         private void OnValidate()

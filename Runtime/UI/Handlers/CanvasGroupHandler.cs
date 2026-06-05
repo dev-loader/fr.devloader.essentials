@@ -1,5 +1,5 @@
-/// Copyright 2025, Antonin Boureau, All rights reserved.
-/// Version 20251113
+/// Copyright 2026, Antonin Boureau, All rights reserved.
+/// Version 20260603
 
 using System.Collections.Generic;
 
@@ -77,7 +77,7 @@ namespace Devloader.UI.Handlers
             InitComponent();
             InitEffects();
 
-            CanvasHandler.instance.AddCanvas(_groupName, this);
+            CanvasHandler.Instance.AddCanvas(_groupName, this);
         }
 
         private void OnEnable()
@@ -85,8 +85,8 @@ namespace Devloader.UI.Handlers
             if (_started)
                 Show();
 
-            _showEffect.events.AddListener(OnEffectEvent);
-            _hideEffect.events.AddListener(OnEffectEvent);
+            _showEffect.Events.AddListener(OnEffectEvent);
+            _hideEffect.Events.AddListener(OnEffectEvent);
         }
 
         private void Start()
@@ -102,7 +102,7 @@ namespace Devloader.UI.Handlers
         private void OnDestroy()
         {
             if(CanvasHandler.HasInstance)
-                CanvasHandler.instance.RemoveCanvas(_groupName);
+                CanvasHandler.Instance.RemoveCanvas(_groupName);
         }
 
         private bool GroupNameAlreadyExists(string groupName)
@@ -163,9 +163,7 @@ namespace Devloader.UI.Handlers
             {
                 case TransitionEffect.Fade:
                     effect = this.ValidateComponent<FadeCanvasGroup>();
-
-                    effect.firstValue = 0;
-                    effect.finalValue = 1;
+                    effect.Direction = AbstractEffect.EffectDirection.A2B;
                     break;
 
                 case TransitionEffect.DragLeft:
@@ -175,20 +173,16 @@ namespace Devloader.UI.Handlers
 
                 case TransitionEffect.ZoomIn:
                     effect = this.ValidateComponent<FadeTransformScale>();
-
-                    effect.firstValue = 1;
-                    effect.finalValue = 0;
+                    effect.Direction = AbstractEffect.EffectDirection.B2A;
                     break;
 
                 case TransitionEffect.ZoomOut:
                     effect = this.ValidateComponent<FadeTransformScale>();
-
-                    effect.firstValue = 0;
-                    effect.finalValue = 1;
+                    effect.Direction = AbstractEffect.EffectDirection.A2B;
                     break;
             }
 
-            effect.duration = duration;
+            effect.Duration = duration;
 
             if(_visibilityOnStart != VisibilityOnStart.LeaveItAsItIs)
                 effect.SetToBegin(1);
@@ -209,7 +203,7 @@ namespace Devloader.UI.Handlers
                     break;
 
                 case EffectEvent.EventType.Completed:
-                    if (effect.direction > 0)
+                    if (effect.Direction == AbstractEffect.EffectDirection.A2B)
                     {
                         _onShow.Invoke();
 
@@ -218,7 +212,7 @@ namespace Devloader.UI.Handlers
 
                         hidden = false;
                     }
-                    else if (effect.direction < 0)
+                    else if (effect.Direction == AbstractEffect.EffectDirection.B2A)
                     {
                         _onHide.Invoke();
                         hidden = true;
