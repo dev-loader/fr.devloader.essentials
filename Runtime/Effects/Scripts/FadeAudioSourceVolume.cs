@@ -1,5 +1,5 @@
 ﻿/// Copyright 2026, Antonin Boureau, All rights reserved.
-/// Version 20260603
+/// Version 20260610
 
 using Devloader.Extensions;
 using UnityEngine;
@@ -22,5 +22,7 @@ namespace Devloader.Effects
 #endif
 
         private void Awake() => ProcessAction = value => _audioSource.volume = value;
+
+        public AudioSource AudioSource { get => _audioSource; set=>_audioSource = value; }
     }
 }

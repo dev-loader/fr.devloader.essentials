@@ -1,12 +1,12 @@
-/// Copyright 2025, Antonin Boureau, All rights reserved.
-/// Version 20250603
+/// Copyright 2026, Antonin Boureau, All rights reserved.
+/// Version 20260609
 
 using UnityEngine;
 using UnityEngine.Events;
 
 namespace Devloader.Effects
 {
-    [AddComponentMenu("Dev'loader/Effects/Effect Behaviour")]
+    [AddComponentMenu("Devloader/Effects/Effect Behaviour")]
     public class EffectBehaviour : MonoBehaviour
     {
         public enum RunDirection

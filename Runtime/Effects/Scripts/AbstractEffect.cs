@@ -1,7 +1,7 @@
 ﻿/// Copyright 2026, Antonin Boureau, All rights reserved.
-/// Version 20260603
+/// Version 20260609
 
-using System;
+using Devloader.InspectorProperty;
 using System.Collections;
 
 using UnityEngine;
@@ -50,7 +50,10 @@ namespace Devloader.Effects
             /// Courbe constante avec y = la valeur envoyée en paramètre
             /// </summary>
             public static AnimationCurve Constant(float value = 0) => AnimationCurve.Constant(0, 1, value);
-            
+
+            /// <summary> Généré par ClaudeAI (Sonnet 4.6).
+            /// Trouver le temps correspondant à la valeur
+            /// </summary>
             public static float FindTimeForValue(AnimationCurve curve, float targetValue, int iterations = 16)
             {
                 float lo = 0f, hi = 1f;
@@ -82,20 +85,30 @@ namespace Devloader.Effects
             A2B = 1
         }
 
+        public enum EffectLoopMethod
+        {
+            None = 0,
+            Cycle = 1,
+            PingPong = 2,
+        }
+
         [Header("Curve settings")]
         [SerializeField] private EffectCurveShapePreset _curveShapePreset;
         [SerializeField] private AnimationCurve _curveShape = AnimationCurveUtils.Linear;
-
-        [Space]
 
         [Header("Effect settings")]
         [SerializeField] private float _duration = 1;
         [SerializeField] private bool _useFixedUpdate;
 
         [Space]
+        [SerializeField] private EffectDirection _direction = EffectDirection.A2B;
+        [SerializeField] private EffectLoopMethod _loopMethod = EffectLoopMethod.None;
 
         [Header("Evenements")]
         [SerializeField] private EffectEvent _events = new EffectEvent();
+
+        [Header("Debug")]
+        [SerializeField, ReadOnly] private float _t = 0;
 
         Coroutine _coroutine = null;
         string _error;
@@ -103,8 +116,8 @@ namespace Devloader.Effects
         float _progress;
         UnityAction<float> _processAction;
 
-        float _t = 0;
-        EffectDirection _direction = EffectDirection.A2B;
+        bool _loop;
+        System.Predicate<float> _processPredicate;
 
 #if UNITY_EDITOR
         protected virtual void OnValidate() => UpdateCurve();
@@ -126,7 +139,7 @@ namespace Devloader.Effects
                     break;
 
                 case EffectCurveShapePreset.EaseIn:
-                    _curveShape = AnimationCurveUtils.Linear;
+                    _curveShape = AnimationCurveUtils.EaseIn;
                     break;
 
                 case EffectCurveShapePreset.EaseOut:
@@ -147,9 +160,11 @@ namespace Devloader.Effects
 
         public static EffectDirection IntDirectionToEffectDirection(int direction) => direction > 0 ? EffectDirection.A2B : (direction < 0 ? EffectDirection.B2A : EffectDirection.Pause);
 
-        public virtual void SetToBegin(int direction) => SetToBegin(IntDirectionToEffectDirection(direction));
+        public virtual AbstractEffect SetToBegin() => SetToBegin(_direction);
 
-        public virtual void SetToBegin(EffectDirection direction)
+        public virtual AbstractEffect SetToBegin(int direction) => SetToBegin(IntDirectionToEffectDirection(direction));
+
+        public virtual AbstractEffect SetToBegin(EffectDirection direction)
         {
             if (_coroutine != null)
             {
@@ -159,15 +174,16 @@ namespace Devloader.Effects
 
             _direction = direction;
 
-            _t = 0;
-            _progress = 0;
+            _t = _direction == EffectDirection.A2B ? 0 : _duration;
+            _progress = _direction == EffectDirection.B2A ? 1 : 0;
 
             _processAction?.Invoke(_curveShape.Evaluate(_t));
+            return this;
         }
 
-        public virtual void SetToBegin(int direction, EffectCurveShapePreset preset, AnimationCurve customCurve = null) => SetToBegin(IntDirectionToEffectDirection(direction), preset, customCurve);
+        public virtual AbstractEffect SetToBegin(int direction, EffectCurveShapePreset preset, AnimationCurve customCurve = null) => SetToBegin(IntDirectionToEffectDirection(direction), preset, customCurve);
 
-        public virtual void SetToBegin(EffectDirection direction, EffectCurveShapePreset preset, AnimationCurve customCurve = null)
+        public virtual AbstractEffect SetToBegin(EffectDirection direction, EffectCurveShapePreset preset, AnimationCurve customCurve = null)
         {
             if (_coroutine != null)
             {
@@ -180,15 +196,18 @@ namespace Devloader.Effects
 
             UpdateCurve(customCurve);
 
-            _t = 0;
-            _progress = 0;
+            _t = _direction == EffectDirection.A2B ? 0 : _duration;
+            _progress = _direction == EffectDirection.B2A ? 1 : 0;
 
             _processAction?.Invoke(_curveShape.Evaluate(_t));
+            return this;
         }
 
-        public virtual void SetToEnd(int direction) => SetToEnd(IntDirectionToEffectDirection(direction));
+        public virtual AbstractEffect SetToEnd() => SetToEnd(_direction);
 
-        public virtual void SetToEnd(EffectDirection direction)
+        public virtual AbstractEffect SetToEnd(int direction) => SetToEnd(IntDirectionToEffectDirection(direction));
+
+        public virtual AbstractEffect SetToEnd(EffectDirection direction)
         {
             if (_coroutine != null)
             {
@@ -198,15 +217,16 @@ namespace Devloader.Effects
 
             _direction = direction;
 
-            _t = _duration;
-            _progress = _duration;
+            _t = _direction == EffectDirection.A2B ? _duration : 0;
+            _progress = _direction == EffectDirection.B2A ? 0 : 1;
 
             _processAction?.Invoke(_curveShape.Evaluate(_duration));
+            return this;
         }
 
-        public virtual void SetToEnd(int direction, EffectCurveShapePreset preset, AnimationCurve customCurve = null) => SetToEnd(IntDirectionToEffectDirection(direction), preset, customCurve);
+        public virtual AbstractEffect SetToEnd(int direction, EffectCurveShapePreset preset, AnimationCurve customCurve = null) => SetToEnd(IntDirectionToEffectDirection(direction), preset, customCurve);
 
-        public virtual void SetToEnd(EffectDirection direction, EffectCurveShapePreset preset, AnimationCurve customCurve = null)
+        public virtual AbstractEffect SetToEnd(EffectDirection direction, EffectCurveShapePreset preset, AnimationCurve customCurve = null)
         {
             if (_coroutine != null)
             {
@@ -219,11 +239,20 @@ namespace Devloader.Effects
 
             UpdateCurve(customCurve);
 
-            _t = _duration;
-            _progress = _duration;
+            _t = _direction == EffectDirection.A2B ? _duration : 0;
+            _progress = _direction == EffectDirection.B2A ? 0 : 1;
 
             _processAction?.Invoke(_curveShape.Evaluate(_duration));
+            return this;
         }
+
+        public EffectDirection ToggleDirection()
+        {
+            _direction = (EffectDirection)(-(int)_direction);
+            return _direction;
+        }
+
+        public virtual void Run() => Run(_direction);
 
         /// <summary>
         /// Start/Pause the fade: -1 to fade out, 0 to pause, 1 to fade in
@@ -244,6 +273,7 @@ namespace Devloader.Effects
             if (_direction == 0)
                 return;
 
+            _loop = _loopMethod != EffectLoopMethod.None;
             _coroutine = StartCoroutine(ProcessCoroutine());
         }
 
@@ -268,6 +298,7 @@ namespace Devloader.Effects
             if (_direction == 0)
                 return;
 
+            _loop = _loopMethod != EffectLoopMethod.None;
             _coroutine = StartCoroutine(ProcessCoroutine(true, UpdateCurve(customCurve)));
         }
 
@@ -276,7 +307,7 @@ namespace Devloader.Effects
             if (curveHasChanged)
                 _t = AnimationCurveUtils.FindTimeForValue(_curveShape, lastValue);
 
-            if(_duration <= 0)
+            if (_duration <= 0)
             {
                 _progress = 1;
                 _events.Invoke(this, EffectEvent.EventType.Completed);
@@ -287,26 +318,39 @@ namespace Devloader.Effects
             _progress = _t / _duration;
             _events.Invoke(this, EffectEvent.EventType.Started);
 
-            Predicate<float> loopControl = _direction == EffectDirection.A2B ? ((t) => t < _duration) : (_direction == EffectDirection.B2A ? ((t) => t > 0) : ((t) => false));
+            _processPredicate = LoopControl;
 
-            while (loopControl(_t))
+            while (_processPredicate(_t))
             {
                 if (_useFixedUpdate)
-                    _t += Time.fixedDeltaTime * (int)_direction;
+                    _t += Time.fixedDeltaTime * (float)_direction;
                 else
-                    _t += Time.deltaTime * (int)_direction;
+                    _t += Time.deltaTime * (float)_direction;
+
+                if (_loop && !_processPredicate(_t))
+                {
+                    if (_loopMethod == EffectLoopMethod.Cycle)
+                    {
+                        _t = _direction == EffectDirection.A2B ? 0 : _duration;
+                        _progress = _direction == EffectDirection.B2A ? 1 : 0;
+                    }
+                    else if (_loopMethod == EffectLoopMethod.PingPong)
+                    {
+                        ToggleDirection();
+                        _processPredicate = LoopControl;
+                    }
+                }
 
                 _progress = _t / _duration;
 
-                _processAction?.Invoke(_curveShape.Evaluate(_t));
+                _processAction?.Invoke(_curveShape.Evaluate(_progress));
                 _events.Invoke(this, EffectEvent.EventType.Progress);
 
-                yield return new WaitForFixedUpdate();
+                if (_useFixedUpdate)
+                    yield return new WaitForFixedUpdate();
+                else
+                    yield return null;
             }
-
-            _t = _duration;
-            _progress = 1;
-            _events.Invoke(this, EffectEvent.EventType.Progress);
 
             _events.Invoke(this, EffectEvent.EventType.Completed);
             yield break;
@@ -317,7 +361,15 @@ namespace Devloader.Effects
         [System.Obsolete("Use Direction property instead")]
         public int direction { get => (int)_direction; set => _direction = IntDirectionToEffectDirection(value); }
 
-        public EffectDirection Direction { get => _direction; set => _direction = value; }
+        public EffectDirection Direction
+        {
+            get => _direction;
+            set
+            {
+                _direction = value;
+                _processPredicate = LoopControl;
+            }
+        }
 
         [System.Obsolete("Use Duration property instead")]
         public float duration { get => _duration; set => _duration = value; }
@@ -340,7 +392,19 @@ namespace Devloader.Effects
 
         [System.Obsolete("Use FinalValue property instead")]
         public float finalValue => FinalValue;
-        public float FinalValue => _curveShape.keys.Length > 0 ? _curveShape.keys[_curveShape.keys.Length-1].value : 1;
+        public float FinalValue => _curveShape.keys.Length > 0 ? _curveShape.keys[_curveShape.keys.Length - 1].value : 1;
+
+        protected virtual System.Predicate<float> LoopControl => _direction == EffectDirection.A2B ? ((t) => t < _duration) : (_direction == EffectDirection.B2A ? ((t) => t > 0) : ((t) => false));
+
+        public EffectLoopMethod LoopMethod
+        {
+            get => _loopMethod;
+            set
+            {
+                _loopMethod = value;
+                _loop = _loopMethod != EffectLoopMethod.None;
+            }
+        }
 
         [System.Obsolete("Use ProcessAction property instead")]
         protected UnityAction<float> processAction { get => _processAction; set => _processAction = value; }

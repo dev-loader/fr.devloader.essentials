@@ -1,5 +1,5 @@
 /// Copyright 2026, Antonin Boureau, All rights reserved.
-/// Version 20260603
+/// Version 20260609
 
 using Devloader.Maths;
 using UnityEngine;
@@ -30,7 +30,8 @@ namespace Devloader.Effects
 
         private void Awake() => ProcessAction = value => transform.position = _clampedPosition.Lerp(value);
 
-        public override void SetToBegin(int direction)
+        [System.Obsolete("Use UpdatePositionsFromReferences then call SetToBegin on the returned reference instead")]
+        public override AbstractEffect SetToBegin(int direction)
         {
             if (_startPositionRef)
                 _clampedPosition.a = _startPositionRef.position;
@@ -38,7 +39,18 @@ namespace Devloader.Effects
             if (_finalPositionRef)
                 _clampedPosition.b = _finalPositionRef.position;
 
-            base.SetToBegin(direction);
+            return base.SetToBegin(direction);
+        }
+
+        public AbstractEffect UpdatePositionsFromReferences()
+        {
+            if (_startPositionRef)
+                _clampedPosition.a = _startPositionRef.position;
+
+            if (_finalPositionRef)
+                _clampedPosition.b = _finalPositionRef.position;
+
+            return this;
         }
     }
 }
