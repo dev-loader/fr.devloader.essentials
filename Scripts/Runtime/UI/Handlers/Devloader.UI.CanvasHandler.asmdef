@@ -1,0 +1,17 @@
+{
+    "name": "Devloader.UI.CanvasHandler",
+    "rootNamespace": "",
+    "references": [
+        "GUID:7751929548eaf154d8158bd2eb74733e",
+        "GUID:e3ed49f9b423e1c4996c92408bbf4895"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
