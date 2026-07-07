@@ -3,12 +3,12 @@
   "displayName": "Dev'loader Essentials Library",
   "author": {
     "name": "Dev'loader",
-    "email": "contact@devloader.fr",
-    "url": "https://devloader.fr"
+    "url": "https://devloader.fr",
+    "email": "contact@devloader.fr"
   },
-  "version": "1.0.0-1.7.2+20260610",
-  "unity": "2022.3",
-  "unityRelease": "20f1",
+  "version": "1.0.0-1.8.0+20260707",
+  "unity": "6000.5",
+  "unityRelease": "2f1",
   "description": "Provides some resources like materials and shaders",
   "keywords": [
     "essentials",
