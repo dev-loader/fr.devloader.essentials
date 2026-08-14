@@ -6,10 +6,10 @@
     "url": "https://devloader.fr",
     "email": "contact@devloader.fr"
   },
-  "version": "1.0.0-1.8.0+20260707",
+  "version": "1.0.0-1.9.0",
   "unity": "6000.5",
-  "unityRelease": "2f1",
-  "description": "Provides some resources like materials and shaders",
+  "unityRelease": "7f1",
+  "description": "Provides basic scripts and some samples.",
   "keywords": [
     "essentials",
     "materials",
@@ -21,44 +21,34 @@
   ],
   "samples": [
     {
-      "displayName": "Material Samples (Built-In)",
-      "description": "Provides some colors using \"Standard\" and \"UI/Default\" shaders.",
+      "displayName": "Required Assets",
+      "description": "Provides the assets needed by the other samples.",
+      "path": "Samples~/Core"
+    },
+    {
+      "displayName": "Additional Assets",
+      "description": "Provides some shapes, textures and ui assets.\n\nUI assets is containing Material color samples using \"UI/Default\" shaders, an \"Advanced Fade Button\" and a \"Grid Scroll View\" prefabs, and some sprite samples usable as background element.",
+      "path": "Samples~/Additional"
+    },
+    {
+      "displayName": "Built-in Materials (deprecated)",
+      "description": "Provides some colors using \"Standard\" shaders.",
       "path": "Samples~/Materials/Built-in"
     },
     {
-      "displayName": "Material Samples (URP)",
-      "description": "Provides some colors using \"URP/Lit\" and \"UI/Default\" shaders.",
-      "path": "Samples~/Materials/URP"
-    },
-    {
-      "displayName": "Material Samples (HDRP)",
-      "description": "Provides some colors using \"HDRP/Lit\" and \"UI/Default\" shaders.",
+      "displayName": "HDRP Material",
+      "description": "Provides some colors using \"HDRP/Lit\" shaders.",
       "path": "Samples~/Materials/HDRP"
     },
     {
-      "displayName": "Shape Samples",
-      "description": "Provides some shapes.",
-      "path": "Samples~/Shapes"
+      "displayName": "URP Environment Assets",
+      "description": "Provides some brushes, trees and water assets.",
+      "path": "Samples~/Environment/URP"
     },
     {
-      "displayName": "Sprite Samples (UI)",
-      "description": "Provides some sprites prepared for UI.",
-      "path": "Samples~/Sprites/UI"
-    },
-    {
-      "displayName": "Texture Samples",
-      "description": "Provides some textures.",
-      "path": "Samples~/Textures"
-    },
-    {
-      "displayName": "[Environment] Flora Samples (URP)",
-      "description": "Provides some brushes and trees.",
-      "path": "Samples~/Flora/URP"
-    },
-    {
-      "displayName": "[Environment] Water Samples (URP)",
-      "description": "Provides some water.",
-      "path": "Samples~/Water/URP"
+      "displayName": "URP Materials",
+      "description": "Provides some colors using \"URP/Lit\" shaders.",
+      "path": "Samples~/Materials/URP"
     }
   ]
 }
