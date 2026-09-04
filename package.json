@@ -69,5 +69,6 @@
     "com.unity.terrain-tools": "5.3.1",
     "com.unity.test-framework": "1.6.0",
     "com.unity.testtools.codecoverage": "1.2.7"
-  }
+  },
+  "publishConfig": { "registry": "https://upm.devloader.fr/" }
 }
